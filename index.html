@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dashboard de Growth de Shadow Studio">
+  <title>Shadow Studio · Growth Command Center</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Shadow Studio</p>
+      <h1>Growth Command Center</h1>
+      <p class="subtitle">Adquisición, monetización, recurrencia, reactivación y renovación en una sola vista.</p>
+    </div>
+    <div class="header-actions">
+      <button id="exportButton" class="button secondary" type="button">Exportar vista CSV</button>
+      <button id="exportTransactionsButton" class="button secondary" type="button">Exportar transacciones</button>
+      <button id="resetButton" class="button" type="button">Restablecer filtros</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="filter-panel" aria-labelledby="filterTitle">
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Control de análisis</p>
+          <h2 id="filterTitle">Filtros vinculados</h2>
+        </div>
+        <p id="coverageLabel" class="context"></p>
+      </div>
+      <div class="filters">
+        <label>Periodo o mes<select id="periodFilter"></select></label>
+        <label>Familia de plan<select id="familyFilter"></select></label>
+        <label>Método de pago<select id="methodFilter"></select></label>
+        <label>Tipo de cliente<select id="typeFilter"></select></label>
+      </div>
+      <div id="customDateRange" class="custom-date-range" hidden>
+        <label>Fecha inicial<input id="startDateFilter" type="date"></label>
+        <label>Fecha final<input id="endDateFilter" type="date"></label>
+        <p id="dateValidation" class="date-validation" role="status"></p>
+      </div>
+    </section>
+
+    <section class="kpi-grid" aria-label="Indicadores principales" aria-live="polite">
+      <article class="kpi accent-blue"><span>Ingreso</span><strong id="revenueKpi">—</strong><small id="revenueContext">Periodo seleccionado</small></article>
+      <article class="kpi accent-green"><span>Pagadores únicos</span><strong id="payersKpi">—</strong><small>Clientes identificados</small></article>
+      <article class="kpi accent-gold"><span>Ingreso nuevo</span><strong id="newRevenueKpi">—</strong><small id="newShareKpi">—</small></article>
+      <article class="kpi accent-neutral"><span>Ticket promedio</span><strong id="ticketKpi">—</strong><small id="transactionsKpi">—</small></article>
+      <article class="kpi accent-purple"><span>Pagadores repetidos</span><strong id="repeatKpi">—</strong><small id="top10Kpi">—</small></article>
+    </section>
+
+    <section class="selection-read" aria-live="polite">
+      <div>
+        <p class="eyebrow">Lectura de la selección</p>
+        <h2 id="selectionHeadline">—</h2>
+      </div>
+      <p id="selectionDetail">—</p>
+    </section>
+
+    <section class="chart-grid">
+      <article class="chart-panel wide">
+        <div class="chart-title"><div><p class="eyebrow">Tendencia</p><h2>Ingreso mensual</h2></div><span id="trendTotal" class="chart-stat"></span></div>
+        <div id="revenueChart" class="chart" role="img" aria-label="Gráfico de ingreso mensual"></div>
+      </article>
+      <article class="chart-panel wide">
+        <div class="chart-title"><div><p class="eyebrow">Composición</p><h2>Ingreso nuevo y recurrente</h2></div><div class="legend"><span><i class="dot new"></i>Nuevo</span><span><i class="dot recurring"></i>Recurrente</span></div></div>
+        <div id="customerMixChart" class="chart" role="img" aria-label="Gráfico de ingreso nuevo y recurrente"></div>
+      </article>
+      <article class="chart-panel">
+        <div class="chart-title"><div><p class="eyebrow">Oferta</p><h2>Ingreso por familia</h2></div></div>
+        <div id="familyChart" class="chart bars" role="img" aria-label="Gráfico de ingreso por familia de plan"></div>
+      </article>
+      <article class="chart-panel">
+        <div class="chart-title"><div><p class="eyebrow">Cobranza</p><h2>Ingreso por método de pago</h2></div></div>
+        <div id="methodChart" class="chart bars" role="img" aria-label="Gráfico de ingreso por método de pago"></div>
+      </article>
+    </section>
+
+    <section class="panel lifecycle-panel">
+      <div class="section-heading lifecycle-heading">
+        <div>
+          <p class="eyebrow">Customer lifecycle</p>
+          <h2>Nuevos, continuos y reactivados</h2>
+          <p class="context lifecycle-definition">Continuo: regresó en hasta 90 días. Reactivado: volvió después de más de 90 días. Enero 2025 representa la primera observación disponible.</p>
+        </div>
+        <div class="legend lifecycle-legend">
+          <span><i class="dot new"></i>Nuevo</span>
+          <span><i class="dot recurring"></i>Continuo</span>
+          <span><i class="dot reactivated"></i>Reactivado</span>
+        </div>
+      </div>
+      <div class="lifecycle-kpis" aria-live="polite">
+        <div><span>Nuevos</span><strong id="newLifecycleKpi">—</strong><small>clientes-mes</small></div>
+        <div><span>Continuos</span><strong id="continuousLifecycleKpi">—</strong><small>clientes-mes</small></div>
+        <div><span>Reactivados</span><strong id="reactivatedLifecycleKpi">—</strong><small>clientes-mes</small></div>
+        <div><span>Reactivación</span><strong id="reactivationShareKpi">—</strong><small>de recurrentes</small></div>
+      </div>
+      <div id="lifecycleMonthlyChart" class="chart lifecycle-monthly-chart" role="img" aria-label="Gráfico mensual de clientes nuevos, continuos y reactivados"></div>
+    </section>
+
+    <section class="insight-grid">
+      <article class="panel opportunities">
+        <div class="section-heading"><div><p class="eyebrow">Diagnóstico</p><h2>Cuellos de botella y oportunidades</h2></div></div>
+        <div id="opportunityList"></div>
+      </article>
+      <article class="panel renewal">
+        <div class="section-heading"><div><p class="eyebrow">Snapshot</p><h2>Renovación y fuga</h2></div><span class="status">Provisional</span></div>
+        <dl class="metric-list">
+          <div><dt>Membresías por vencer</dt><dd id="dueValue">—</dd></div>
+          <div><dt>Renovadas o retenidas</dt><dd id="retainedValue">—</dd></div>
+          <div><dt>Fugas potenciales</dt><dd id="fugueValue">—</dd></div>
+          <div class="critical"><dt>Churn provisional</dt><dd id="churnValue">—</dd></div>
+          <div><dt>Último pago asociado</dt><dd id="renewalValue">—</dd></div>
+        </dl>
+        <p class="notice">La fuga no se calcula por ausencia de pago. Requiere vencimiento, no renovación y una ventana de gracia acordada.</p>
+      </article>
+    </section>
+
+    <section class="lower-grid">
+      <article class="panel">
+        <div class="section-heading"><div><p class="eyebrow">Base de clientes</p><h2>Ciclo de vida observado</h2></div></div>
+        <div id="lifecycleChart" class="lifecycle"></div>
+      </article>
+      <article class="panel">
+        <div class="section-heading"><div><p class="eyebrow">Confiabilidad</p><h2>Calidad de datos</h2></div></div>
+        <div id="qualityGrid" class="quality-grid"></div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>Fuente: exports de clientes, ingresos y membresías de Shadow Studio. Octubre 2026 contiene solo tres días.</p>
+    <p id="updatedLabel"></p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
