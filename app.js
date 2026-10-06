@@ -13,7 +13,8 @@
   const lifecycleMonthlyMap = new Map(data.lifecycleMonthly.map(row => [row.slice(0, 4).join("¦"), row]));
   const periodMap = new Map(data.periods.map(row => [row.label, row]));
   const monthByLabel = new Map(data.months.map(month => [month.label, month]));
-  const state = { period: "Ene-Sep 2026", family: "Todos", method: "Todos", type: "Todos", startDate: data.dateMin, endDate: data.dateMax };
+  const latestMonthLabel = data.months[data.months.length - 1].label;
+  const state = { period: latestMonthLabel, family: "Todos", method: "Todos", type: "Todos", startDate: data.dateMin, endDate: data.dateMax };
 
   const controls = {
     period: $("periodFilter"), family: $("familyFilter"), method: $("methodFilter"), type: $("typeFilter"),
@@ -30,7 +31,9 @@
     }));
   }
 
-  fillSelect(controls.period, [...data.periods, { label: "Personalizado" }], state.period);
+  const monthLabels = new Set(data.months.map(month => month.label));
+  const presetPeriods = data.periods.filter(period => !monthLabels.has(period.label));
+  fillSelect(controls.period, [[...data.months].reverse(), presetPeriods, [{ label: "Personalizado" }]].flat(), state.period);
   fillSelect(controls.family, data.families, state.family);
   fillSelect(controls.method, data.methods, state.method);
   fillSelect(controls.type, data.types, state.type);
@@ -373,7 +376,7 @@
   Object.values(controls).forEach(control => control.addEventListener("change", updateAll));
   Object.values(dateControls).forEach(control => control.addEventListener("change", updateAll));
   $("resetButton").addEventListener("click", () => {
-    state.period = "Ene-Sep 2026"; state.family = state.method = state.type = "Todos";
+    state.period = latestMonthLabel; state.family = state.method = state.type = "Todos";
     state.startDate = data.dateMin; state.endDate = data.dateMax;
     dateControls.start.value = state.startDate; dateControls.end.value = state.endDate;
     Object.keys(controls).forEach(key => controls[key].value = state[key]); updateAll();

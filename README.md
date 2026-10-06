@@ -8,7 +8,7 @@ Abre `index.html` directamente en el navegador.
 
 ## Filtros y exportación
 
-- El filtro **Periodo o mes** incluye periodos predefinidos, meses individuales y la opción **Personalizado** para elegir una fecha inicial y final.
+- El filtro **Periodo o mes** comienza en el mes más reciente disponible y ordena los meses hacia atrás. Después muestra periodos predefinidos y la opción **Personalizado** para elegir una fecha inicial y final.
 - **Exportar vista CSV** descarga el resumen mensual de la selección actual.
 - **Exportar transacciones** descarga las transacciones que cumplen todos los filtros activos.
 - La versión web pública no incluye nombres ni DNI. Cada cliente utiliza un código anónimo para conservar los cálculos de pagadores únicos, recurrencia y lifecycle.
