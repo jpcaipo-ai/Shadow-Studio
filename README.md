@@ -35,6 +35,8 @@ El archivo `data.js` contiene los agregados utilizados por el dashboard. Sustit�
 
 El tablero cruza ventas, clases de prueba y asistencias sin exponer datos personales. La conversión de prueba se define como la compra de un paquete dentro de los 30 días posteriores. Las cohortes con menos de 30 días se muestran como inmaduras.
 
+El volumen de clases de prueba agrupa Free Pass y 2×1, con desglose mensual por fecha de venta. El análisis de uso de ambas clases se mantiene separado y aplica únicamente al 2×1.
+
 La probabilidad de renovación se calcula sobre vencimientos históricos maduros a 30 y 90 días. Los vencimientos próximos usan la fecha final real de cada membresía. El export de asistencias no contiene fecha de reserva, inasistencias ni aforo configurado; por eso la capacidad muestra carga observada y no ocupación o anticipación de agenda.
 
 La valorización de renovaciones usa, cliente por cliente, el importe de su último paquete pagado. Cada cliente próximo a vencer se cuenta una sola vez. El tablero muestra tanto la cartera potencial como la facturación esperada ajustada por la probabilidad histórica de renovación a 90 días.

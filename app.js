@@ -296,32 +296,36 @@
     }));
   }
 
-  function renderTwoForOneChart(container, rows) {
-    if (!rows.length) { container.innerHTML = '<div class="empty">Sin ventas 2×1 registradas.</div>'; return; }
-    const { svg, width, height } = makeSvg(container, 230, "Clases de prueba 2 por 1 vendidas por mes");
+  function renderTrialVolumeChart(container, rows) {
+    if (!rows.length) { container.innerHTML = '<div class="empty">Sin clases de prueba registradas.</div>'; return; }
+    const { svg, width, height } = makeSvg(container, 230, "Free Pass y clases de prueba 2 por 1 por mes");
     const margin = { top: 20, right: 18, bottom: 38, left: 42 };
     const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
-    const max = Math.max(...rows.map(row => row.purchases), 1) * 1.15;
+    const max = Math.max(...rows.map(row => row.total_trials), 1) * 1.15;
     const y = scaleLinear(max, margin.top + plotH, margin.top);
-    const band = plotW / rows.length, barW = Math.max(22, Math.min(72, band * .55));
+    const band = plotW / rows.length, barW = Math.max(6, Math.min(36, band * .66));
     rows.forEach((row, index) => {
       const x = margin.left + index * band + (band - barW) / 2;
-      const rect = svgEl("rect", { x, y: y(row.purchases), width: barW, height: margin.top + plotH - y(row.purchases), rx: 5, fill: "var(--gold)", class: "bar", tabindex: "0" });
-      rect.append(svgEl("title", {}, `${row.month}: ${integer.format(row.purchases)} ventas 2×1`)); svg.append(rect);
-      svg.append(svgEl("text", { x: x + barW / 2, y: y(row.purchases) - 7, "text-anchor": "middle", class: "axis" }, integer.format(row.purchases)));
-      svg.append(svgEl("text", { x: x + barW / 2, y: height - 12, "text-anchor": "middle", class: "axis" }, row.month));
+      const freeRect = svgEl("rect", { x, y: y(row.free_pass), width: barW, height: margin.top + plotH - y(row.free_pass), rx: 3, fill: "var(--blue)", class: "bar", tabindex: "0" });
+      freeRect.append(svgEl("title", {}, `${row.month} · Free Pass: ${integer.format(row.free_pass)}`)); svg.append(freeRect);
+      const twoRect = svgEl("rect", { x, y: y(row.total_trials), width: barW, height: Math.max(0, y(row.free_pass) - y(row.total_trials)), rx: 3, fill: "var(--gold)", class: "bar", tabindex: "0" });
+      twoRect.append(svgEl("title", {}, `${row.month} · 2×1: ${integer.format(row.two_for_one)}`)); svg.append(twoRect);
+      if (rows.length <= 12 || index % 3 === 0 || index === rows.length - 1) svg.append(svgEl("text", { x: x + barW / 2, y: height - 12, "text-anchor": "middle", class: "axis" }, row.month.slice(2)));
     });
     svg.append(svgEl("line", { x1: margin.left, y1: margin.top + plotH, x2: width - margin.right, y2: margin.top + plotH, class: "baseline" }));
   }
 
   function renderOperations() {
-    const allTwo = funnel.two_for_one?.monthly || [];
+    const volumeTotals = funnel.trial_volume_totals || {};
+    const volumeMonthly = funnel.trial_volume_monthly || [];
     const two = rowsInVisibleMonths(funnel.two_for_one?.monthly);
     const t = two.reduce((a, r) => ({ purchases: a.purchases + r.purchases, zero: a.zero + r.attended_zero, one: a.one + r.attended_one, both: a.both + r.used_both, follow: a.follow + r.follow_on }), { purchases: 0, zero: 0, one: 0, both: 0, follow: 0 });
-    setText("twoTotalKpi", integer.format(funnel.two_for_one?.purchases || 0));
+    setText("trialVolumeTotalKpi", integer.format(volumeTotals.total_trials || 0));
+    setText("freePassTotalKpi", integer.format(volumeTotals.free_pass || 0));
+    setText("twoTotalKpi", integer.format(volumeTotals.two_for_one || 0));
     setText("twoPurchasesKpi", integer.format(t.purchases)); setText("twoBothKpi", integer.format(t.both)); setText("twoOneKpi", integer.format(t.one)); setText("twoZeroKpi", integer.format(t.zero)); setText("twoFollowKpi", integer.format(t.follow));
     setText("twoForOneNote", t.purchases ? `${percent.format(t.both / t.purchases)} utilizó ambas clases. La conversión posterior necesita 60 días completos para consolidarse.` : "La promoción 2×1 solo aparece desde septiembre de 2026.");
-    renderTwoForOneChart($("twoForOneMonthlyChart"), allTwo);
+    renderTrialVolumeChart($("trialVolumeMonthlyChart"), volumeMonthly);
 
     const attendance = rowsInVisibleMonths(funnel.attendance_monthly);
     const a = attendance.reduce((acc, r) => ({ attendances: acc.attendances + r.attendances, clients: acc.clients + r.unique_clients, sessions: acc.sessions + r.sessions, p90: Math.max(acc.p90, r.p90_attendees_session || 0) }), { attendances: 0, clients: 0, sessions: 0, p90: 0 });

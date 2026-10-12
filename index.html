@@ -151,14 +151,16 @@
 
     <section class="operations-grid">
       <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">Clase de prueba 2×1</p><h2>Ventas y uso de las dos clases</h2><p class="context">El total histórico y las ventas por mes corresponden exclusivamente a la clase de prueba 2×1.</p></div></div>
-        <div class="total-widget"><span>Total histórico de 2×1</span><strong id="twoTotalKpi">—</strong><small>clases de prueba vendidas</small></div>
-        <div id="twoForOneMonthlyChart" class="chart compact-chart" role="img" aria-label="Clases de prueba 2 por 1 vendidas por mes"></div>
+        <div class="section-heading"><div><p class="eyebrow">Clases de prueba</p><h2>Free Pass y 2×1 por mes</h2><p class="context">Volumen según fecha de venta. Incluye pruebas gratuitas y la promoción pagada 2×1.</p></div></div>
+        <div class="total-widget"><span>Total histórico de clases de prueba</span><strong id="trialVolumeTotalKpi">—</strong><div class="trial-volume-split"><small>Free Pass: <b id="freePassTotalKpi">—</b></small><small>2×1: <b id="twoTotalKpi">—</b></small></div></div>
+        <div class="legend trial-legend"><span><i class="dot new"></i>Free Pass</span><span><i class="dot trial-two"></i>2×1</span></div>
+        <div id="trialVolumeMonthlyChart" class="chart compact-chart" role="img" aria-label="Free Pass y clases de prueba 2 por 1 vendidas por mes"></div>
+        <p class="mini-title">Seguimiento de la prueba 2×1</p>
         <dl class="metric-list">
           <div><dt>Ventas 2×1 en el periodo filtrado</dt><dd id="twoPurchasesKpi">—</dd></div>
           <div><dt>Usaron las dos clases</dt><dd id="twoBothKpi">—</dd></div>
           <div><dt>Usaron una clase</dt><dd id="twoOneKpi">—</dd></div>
-          <div><dt>No asistieron todavía</dt><dd id="twoZeroKpi">—</dd></div>
+          <div><dt>No asistieron</dt><dd id="twoZeroKpi">—</dd></div>
           <div><dt>Compraron otro paquete ≤60 días</dt><dd id="twoFollowKpi">—</dd></div>
         </dl>
         <p id="twoForOneNote" class="notice"></p>

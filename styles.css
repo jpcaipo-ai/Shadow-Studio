@@ -59,6 +59,7 @@ select { padding-right: 34px; }
 .dot { display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 50%; background: var(--blue); }.dot.recurring { background: var(--green); }
 .dot.reactivated { background: var(--purple); }
 .dot.resurrected { background: var(--gold); }
+.dot.trial-two { background: var(--gold); }
 .funnel-panel { margin-top: 16px; }
 .funnel-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 4px 0 18px; }
 .funnel-kpis > div, .conversion-card { padding: 14px 16px; background: var(--surface-soft); border-radius: 9px; }
@@ -95,6 +96,9 @@ select { padding-right: 34px; }
 .total-widget { display: grid; gap: 2px; margin: 4px 0 10px; padding: 18px; border-radius: 10px; background: var(--navy); color: #fff; }
 .total-widget span, .total-widget small { color: #c9d7e2; }
 .total-widget strong { font-size: 34px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.trial-volume-split { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 4px; }
+.trial-volume-split b { color: #fff; font-variant-numeric: tabular-nums; }
+.trial-legend { justify-content: flex-end; margin: 4px 0 -10px; }
 .compact-chart { min-height: 230px; margin-bottom: 6px; }
 .compact-chart svg { height: 230px; }
 .notice { margin: 18px 0 0; padding: 14px; background: #fbebed; color: #7f2f3a; border-radius: 8px; }
