@@ -37,6 +37,8 @@ El tablero cruza ventas, clases de prueba y asistencias sin exponer datos person
 
 La probabilidad de renovación se calcula sobre vencimientos históricos maduros a 30 y 90 días. Los vencimientos próximos usan la fecha final real de cada membresía. El export de asistencias no contiene fecha de reserva, inasistencias ni aforo configurado; por eso la capacidad muestra carga observada y no ocupación o anticipación de agenda.
 
+La valorización de renovaciones utiliza un ticket proyectado de S/400 por cliente. El tablero muestra tanto la cartera potencial si todos renuevan como la facturación esperada ajustada por la probabilidad histórica de renovación a 90 días.
+
 ## Customer lifecycle
 
 El lifecycle se calcula por cliente-mes y responde a los filtros del tablero:

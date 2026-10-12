@@ -296,11 +296,32 @@
     }));
   }
 
+  function renderTwoForOneChart(container, rows) {
+    if (!rows.length) { container.innerHTML = '<div class="empty">Sin ventas 2×1 registradas.</div>'; return; }
+    const { svg, width, height } = makeSvg(container, 230, "Clases de prueba 2 por 1 vendidas por mes");
+    const margin = { top: 20, right: 18, bottom: 38, left: 42 };
+    const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
+    const max = Math.max(...rows.map(row => row.purchases), 1) * 1.15;
+    const y = scaleLinear(max, margin.top + plotH, margin.top);
+    const band = plotW / rows.length, barW = Math.max(22, Math.min(72, band * .55));
+    rows.forEach((row, index) => {
+      const x = margin.left + index * band + (band - barW) / 2;
+      const rect = svgEl("rect", { x, y: y(row.purchases), width: barW, height: margin.top + plotH - y(row.purchases), rx: 5, fill: "var(--gold)", class: "bar", tabindex: "0" });
+      rect.append(svgEl("title", {}, `${row.month}: ${integer.format(row.purchases)} ventas 2×1`)); svg.append(rect);
+      svg.append(svgEl("text", { x: x + barW / 2, y: y(row.purchases) - 7, "text-anchor": "middle", class: "axis" }, integer.format(row.purchases)));
+      svg.append(svgEl("text", { x: x + barW / 2, y: height - 12, "text-anchor": "middle", class: "axis" }, row.month));
+    });
+    svg.append(svgEl("line", { x1: margin.left, y1: margin.top + plotH, x2: width - margin.right, y2: margin.top + plotH, class: "baseline" }));
+  }
+
   function renderOperations() {
+    const allTwo = funnel.two_for_one?.monthly || [];
     const two = rowsInVisibleMonths(funnel.two_for_one?.monthly);
     const t = two.reduce((a, r) => ({ purchases: a.purchases + r.purchases, zero: a.zero + r.attended_zero, one: a.one + r.attended_one, both: a.both + r.used_both, follow: a.follow + r.follow_on }), { purchases: 0, zero: 0, one: 0, both: 0, follow: 0 });
+    setText("twoTotalKpi", integer.format(funnel.two_for_one?.purchases || 0));
     setText("twoPurchasesKpi", integer.format(t.purchases)); setText("twoBothKpi", integer.format(t.both)); setText("twoOneKpi", integer.format(t.one)); setText("twoZeroKpi", integer.format(t.zero)); setText("twoFollowKpi", integer.format(t.follow));
     setText("twoForOneNote", t.purchases ? `${percent.format(t.both / t.purchases)} utilizó ambas clases. La conversión posterior necesita 60 días completos para consolidarse.` : "La promoción 2×1 solo aparece desde septiembre de 2026.");
+    renderTwoForOneChart($("twoForOneMonthlyChart"), allTwo);
 
     const attendance = rowsInVisibleMonths(funnel.attendance_monthly);
     const a = attendance.reduce((acc, r) => ({ attendances: acc.attendances + r.attendances, clients: acc.clients + r.unique_clients, sessions: acc.sessions + r.sessions, p90: Math.max(acc.p90, r.p90_attendees_session || 0) }), { attendances: 0, clients: 0, sessions: 0, p90: 0 });
@@ -337,17 +358,29 @@
     renderLineChart($("revenueChart"), trendRows);
     renderMixChart($("customerMixChart"), mixRows);
 
-    const lifecycleRows = rowsInVisibleMonths(funnel.lifecycle_monthly).map(row => ({ label: monthByLabel.get([...monthByLabel.keys()].find(label => monthByLabel.get(label).key === row.month))?.label || row.month, newCount: row["Nuevo observado"] || 0, continuousCount: row["Renovación continua"] || 0, reactivatedCount: row["Reactivación"] || 0, resurrectedCount: row["Resurrección"] || 0 }));
+    const lifecycleRows = rowsInVisibleMonths(funnel.lifecycle_monthly).map(row => ({ label: monthByLabel.get([...monthByLabel.keys()].find(label => monthByLabel.get(label).key === row.month))?.label || row.month, total: row.total || 0, revenue: row.revenue || 0, newCount: row["Nuevo observado"] || 0, newRevenue: row["Nuevo observado_revenue"] || 0, continuousCount: row["Renovación continua"] || 0, continuousRevenue: row["Renovación continua_revenue"] || 0, reactivatedCount: row["Reactivación"] || 0, reactivatedRevenue: row["Reactivación_revenue"] || 0, resurrectedCount: row["Resurrección"] || 0, resurrectedRevenue: row["Resurrección_revenue"] || 0 }));
     const lifecycleTotals = lifecycleRows.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      revenue: acc.revenue + row.revenue,
       newCount: acc.newCount + row.newCount,
+      newRevenue: acc.newRevenue + row.newRevenue,
       continuousCount: acc.continuousCount + row.continuousCount,
+      continuousRevenue: acc.continuousRevenue + row.continuousRevenue,
       reactivatedCount: acc.reactivatedCount + row.reactivatedCount,
+      reactivatedRevenue: acc.reactivatedRevenue + row.reactivatedRevenue,
       resurrectedCount: acc.resurrectedCount + row.resurrectedCount,
-    }), { newCount: 0, continuousCount: 0, reactivatedCount: 0, resurrectedCount: 0 });
+      resurrectedRevenue: acc.resurrectedRevenue + row.resurrectedRevenue,
+    }), { total: 0, revenue: 0, newCount: 0, newRevenue: 0, continuousCount: 0, continuousRevenue: 0, reactivatedCount: 0, reactivatedRevenue: 0, resurrectedCount: 0, resurrectedRevenue: 0 });
+    setText("lifecycleRevenueKpi", currency.format(lifecycleTotals.revenue));
+    setText("lifecyclePurchasesKpi", integer.format(lifecycleTotals.total));
     setText("newLifecycleKpi", integer.format(lifecycleTotals.newCount));
+    setText("newLifecycleRevenueKpi", `${currency.format(lifecycleTotals.newRevenue)} facturados`);
     setText("continuousLifecycleKpi", integer.format(lifecycleTotals.continuousCount));
+    setText("continuousLifecycleRevenueKpi", `${currency.format(lifecycleTotals.continuousRevenue)} facturados`);
     setText("reactivatedLifecycleKpi", integer.format(lifecycleTotals.reactivatedCount));
+    setText("reactivatedLifecycleRevenueKpi", `${currency.format(lifecycleTotals.reactivatedRevenue)} facturados`);
     setText("resurrectedLifecycleKpi", integer.format(lifecycleTotals.resurrectedCount));
+    setText("resurrectedLifecycleRevenueKpi", `${currency.format(lifecycleTotals.resurrectedRevenue)} facturados`);
     renderLifecycleMonthlyChart($("lifecycleMonthlyChart"), lifecycleRows);
 
     const familyValues = data.families.filter(v => v !== "Todos" && (state.family === "Todos" || state.family === v))
@@ -369,10 +402,15 @@
     }));
 
     const renewal = funnel.renewal_probability || {}, gap = funnel.renewal_gap_stats || {};
+    const renewalTicket = 400;
+    const expectedRenewals = (renewal.due_unique_clients || 0) * (renewal.rate_90 || 0);
     setText("dueValue", integer.format(renewal.due_unique_clients || 0));
     setText("retainedValue", percent.format(renewal.rate_30 || 0));
     setText("fugueValue", percent.format(renewal.rate_90 || 0));
-    setText("churnValue", integer.format(Math.round((renewal.due_unique_clients || 0) * (renewal.rate_90 || 0))));
+    setText("renewalTicketValue", currency.format(renewalTicket));
+    setText("churnValue", integer.format(Math.round(expectedRenewals)));
+    setText("renewalPipelineValue", currency.format((renewal.due_unique_clients || 0) * renewalTicket));
+    setText("renewalExpectedValue", currency.format(expectedRenewals * renewalTicket));
     setText("renewalValue", percent.format(gap.within_90d || 0));
 
     const lifecycleOrder = ["Nuevo: 1 pago <=60d", "Activo recurrente", "Activo de 1 compra", "En seguimiento 91-180d", "En riesgo 181-365d", "Inactivo >365d"];
@@ -453,7 +491,7 @@
   $("exportButton").addEventListener("click", exportCsv);
   $("exportTransactionsButton").addEventListener("click", exportTransactionsCsv);
   let resizeTimer;
-  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderCharts(); renderFunnel(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderCharts(); renderFunnel(); renderOperations(); }, 120); });
 
   setText("updatedLabel", `Corte del tablero: ${data.generatedAt}`);
   renderStaticSections();

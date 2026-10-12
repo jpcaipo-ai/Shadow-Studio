@@ -117,10 +117,12 @@
         </div>
       </div>
       <div class="lifecycle-kpis" aria-live="polite">
-        <div><span>Nuevos</span><strong id="newLifecycleKpi">—</strong><small>clientes-mes</small></div>
-        <div><span>Renovaciones</span><strong id="continuousLifecycleKpi">—</strong><small>compras del periodo</small></div>
-        <div><span>Reactivaciones</span><strong id="reactivatedLifecycleKpi">—</strong><small>compras del periodo</small></div>
-        <div><span>Resurrecciones</span><strong id="resurrectedLifecycleKpi">—</strong><small>compras del periodo</small></div>
+        <div class="lifecycle-total"><span>Facturación lifecycle</span><strong id="lifecycleRevenueKpi">—</strong><small>paquetes pagados del periodo</small></div>
+        <div class="lifecycle-total"><span>Compras lifecycle</span><strong id="lifecyclePurchasesKpi">—</strong><small>transacciones clasificadas</small></div>
+        <div><span>Nuevos</span><strong id="newLifecycleKpi">—</strong><small id="newLifecycleRevenueKpi">—</small></div>
+        <div><span>Renovaciones</span><strong id="continuousLifecycleKpi">—</strong><small id="continuousLifecycleRevenueKpi">—</small></div>
+        <div><span>Reactivaciones</span><strong id="reactivatedLifecycleKpi">—</strong><small id="reactivatedLifecycleRevenueKpi">—</small></div>
+        <div><span>Resurrecciones</span><strong id="resurrectedLifecycleKpi">—</strong><small id="resurrectedLifecycleRevenueKpi">—</small></div>
       </div>
       <div id="lifecycleMonthlyChart" class="chart lifecycle-monthly-chart" role="img" aria-label="Gráfico mensual de clientes nuevos, continuos y reactivados"></div>
     </section>
@@ -136,7 +138,10 @@
           <div><dt>Clientes por vencer, próximos 30 días</dt><dd id="dueValue">—</dd></div>
           <div><dt>Probabilidad de renovar en 30 días</dt><dd id="retainedValue">—</dd></div>
           <div><dt>Probabilidad de renovar en 90 días</dt><dd id="fugueValue">—</dd></div>
+          <div><dt>Ticket proyectado por renovación</dt><dd id="renewalTicketValue">—</dd></div>
           <div><dt>Renovaciones esperadas</dt><dd id="churnValue">—</dd></div>
+          <div><dt>Cartera potencial si todos renuevan</dt><dd id="renewalPipelineValue">—</dd></div>
+          <div><dt>Facturación esperada ajustada</dt><dd id="renewalExpectedValue">—</dd></div>
           <div><dt>Retornos capturados a 90 días</dt><dd id="renewalValue">—</dd></div>
         </dl>
         <p class="notice">El corte de 90 días captura 90.2% de los retornos observados; 30 días dejaría fuera una parte material.</p>
@@ -145,9 +150,11 @@
 
     <section class="operations-grid">
       <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">Promoción 2×1</p><h2>Uso de las dos clases</h2></div></div>
+        <div class="section-heading"><div><p class="eyebrow">Clase de prueba 2×1</p><h2>Ventas y uso de las dos clases</h2><p class="context">El total histórico y las ventas por mes corresponden exclusivamente a la clase de prueba 2×1.</p></div></div>
+        <div class="total-widget"><span>Total histórico de 2×1</span><strong id="twoTotalKpi">—</strong><small>clases de prueba vendidas</small></div>
+        <div id="twoForOneMonthlyChart" class="chart compact-chart" role="img" aria-label="Clases de prueba 2 por 1 vendidas por mes"></div>
         <dl class="metric-list">
-          <div><dt>Compras</dt><dd id="twoPurchasesKpi">—</dd></div>
+          <div><dt>Ventas 2×1 en el periodo filtrado</dt><dd id="twoPurchasesKpi">—</dd></div>
           <div><dt>Usaron las dos clases</dt><dd id="twoBothKpi">—</dd></div>
           <div><dt>Usaron una clase</dt><dd id="twoOneKpi">—</dd></div>
           <div><dt>No asistieron todavía</dt><dd id="twoZeroKpi">—</dd></div>
