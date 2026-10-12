@@ -361,6 +361,13 @@
     setText("twoPurchasesKpi", integer.format(t.purchases)); setText("twoBothKpi", integer.format(t.both)); setText("twoOneKpi", integer.format(t.one)); setText("twoZeroKpi", integer.format(t.zero)); setText("twoFollowKpi", integer.format(t.follow));
     setText("twoForOneNote", t.purchases ? `${percent.format(t.both / t.purchases)} utilizó ambas clases. La conversión posterior necesita 60 días completos para consolidarse.` : "La promoción 2×1 solo aparece desde septiembre de 2026.");
     renderTrialVolumeChart($("trialVolumeMonthlyChart"), volumeMonthly);
+    $("trialVolumeTable").replaceChildren(...[...volumeMonthly].reverse().map(month => {
+      const row = document.createElement("tr");
+      [month.month, month.total_trials, month.free_pass, month.two_for_one, month.unique_clients].forEach((value, index) => {
+        const cell = document.createElement("td"); cell.textContent = index ? integer.format(value) : value; row.append(cell);
+      });
+      return row;
+    }));
 
     const attendance = rowsInVisibleMonths(funnel.attendance_monthly);
     const a = attendance.reduce((acc, r) => ({ attendances: acc.attendances + r.attendances, clients: acc.clients + r.unique_clients, sessions: acc.sessions + r.sessions, p90: Math.max(acc.p90, r.p90_attendees_session || 0) }), { attendances: 0, clients: 0, sessions: 0, p90: 0 });
