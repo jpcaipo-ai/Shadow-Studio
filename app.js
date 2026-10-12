@@ -272,14 +272,21 @@
     const rows = rowsInVisibleMonths(funnel.trial_monthly);
     const totals = rows.reduce((acc, row) => {
       acc.trials += row.trial_customers; acc.attended += row.attended; acc.matured += row.matured_30d; acc.converted += row.converted_30d;
+      if (row.avg_first_package != null && row.converted_30d) acc.ticketValue += row.avg_first_package * row.converted_30d;
       if (row.median_days_to_purchase != null && row.converted_30d) { acc.days += row.median_days_to_purchase * row.converted_30d; acc.daysWeight += row.converted_30d; }
       return acc;
-    }, { trials: 0, attended: 0, matured: 0, converted: 0, days: 0, daysWeight: 0 });
+    }, { trials: 0, attended: 0, matured: 0, converted: 0, ticketValue: 0, days: 0, daysWeight: 0 });
     setText("trialCustomersKpi", integer.format(totals.trials));
     setText("trialAttendanceKpi", integer.format(totals.attended));
     setText("trialAttendanceRateKpi", totals.trials ? `${percent.format(totals.attended / totals.trials)} de las pruebas` : "Sin pruebas");
     setText("trialConvertedKpi", integer.format(totals.converted));
     setText("trialConversionKpi", totals.matured ? percent.format(totals.converted / totals.matured) : "Cohorte inmadura");
+    setText("trialTicketKpi", totals.converted ? currency.format(totals.ticketValue / totals.converted) : "—");
+    const packageTotals = new Map();
+    rowsInVisibleMonths(funnel.trial_package_monthly).forEach(row => packageTotals.set(row.package, (packageTotals.get(row.package) || 0) + row.buyers));
+    const topPackage = [...packageTotals].sort((a, b) => b[1] - a[1])[0];
+    setText("trialTopPackageKpi", topPackage ? topPackage[0] : "—");
+    setText("trialTopPackageShareKpi", topPackage && totals.converted ? `${integer.format(topPackage[1])} compradores · ${percent.format(topPackage[1] / totals.converted)}` : "Sin cohorte madura");
     setText("trialDaysKpi", totals.daysWeight ? `${(totals.days / totals.daysWeight).toFixed(1)} días` : "—");
     renderFunnelChart($("funnelMonthlyChart"), rows);
 
@@ -293,6 +300,34 @@
       const item = document.createElement("div");
       item.innerHTML = `<span>${name}</span><strong>${value.customers ? percent.format(value.converted / value.customers) : "—"}</strong><small>${integer.format(value.converted)} de ${integer.format(value.customers)} · ticket ${value.converted ? currency.format(value.value / value.converted) : "—"}</small>`;
       return item;
+    }));
+    renderTrialMonthlyTable();
+  }
+
+  function renderTrialMonthlyTable() {
+    const monthly = (funnel.trial_monthly || []).slice(-12);
+    const groupMap = new Map((funnel.trial_conversion_by_attendance_monthly || []).map(row => [`${row.month}¦${row.group}`, row]));
+    const body = $("trialMonthlyTable");
+    const addCell = (row, main, detail = "", className = "") => {
+      const cell = document.createElement("td"); if (className) cell.className = className;
+      const strong = document.createElement("strong"); strong.textContent = main; cell.append(strong);
+      if (detail) { const small = document.createElement("small"); small.textContent = detail; cell.append(small); }
+      row.append(cell);
+    };
+    body.replaceChildren(...monthly.map(month => {
+      const row = document.createElement("tr");
+      const zero = groupMap.get(`${month.month}¦0 clases`), one = groupMap.get(`${month.month}¦1 clase`), two = groupMap.get(`${month.month}¦2+ clases`);
+      addCell(row, month.month);
+      addCell(row, integer.format(month.trial_customers));
+      addCell(row, percent.format(month.attendance_rate || 0), `${integer.format(month.attended)} asistieron`);
+      addCell(row, `${integer.format(month.zero_attendance)} · ${percent.format(month.zero_attendance_rate || 0)}`, zero ? `Conv. ${percent.format(zero.conversion_30d || 0)}` : "Conv. pendiente");
+      addCell(row, `${integer.format(month.one_attendance)} · ${percent.format(month.one_attendance_rate || 0)}`, one ? `Conv. ${percent.format(one.conversion_30d || 0)}` : "Conv. pendiente");
+      addCell(row, `${integer.format(month.two_plus_attendance)} · ${percent.format(month.two_plus_attendance_rate || 0)}`, two ? `Conv. ${percent.format(two.conversion_30d || 0)}` : "Conv. pendiente");
+      if (month.matured_30d) addCell(row, percent.format(month.conversion_30d || 0), `${integer.format(month.converted_30d)} de ${integer.format(month.matured_30d)} maduras`);
+      else addCell(row, "Inmadura", "Aún no cumple 30 días", "immature");
+      addCell(row, month.avg_first_package != null ? currency.format(month.avg_first_package) : "—");
+      addCell(row, month.top_package || "—", month.top_package ? `${integer.format(month.top_package_buyers)} compradores · ${percent.format(month.top_package_share || 0)}` : "");
+      return row;
     }));
   }
 

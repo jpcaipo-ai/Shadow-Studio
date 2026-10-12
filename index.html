@@ -91,6 +91,8 @@
         <div><span>Asistieron</span><strong id="trialAttendanceKpi">—</strong><small id="trialAttendanceRateKpi">—</small></div>
         <div><span>Compraron</span><strong id="trialConvertedKpi">—</strong><small>dentro de 30 días</small></div>
         <div><span>Conversión</span><strong id="trialConversionKpi">—</strong><small>solo cohortes maduras</small></div>
+        <div><span>Ticket promedio</span><strong id="trialTicketKpi">—</strong><small>primera compra ≤30 días</small></div>
+        <div><span>Paquete principal</span><strong id="trialTopPackageKpi" class="text-kpi">—</strong><small id="trialTopPackageShareKpi">—</small></div>
         <div><span>Tiempo a compra</span><strong id="trialDaysKpi">—</strong><small>mediana en días</small></div>
       </div>
       <div class="funnel-layout">
@@ -99,6 +101,13 @@
           <p class="mini-title">Conversión según asistencia</p>
           <div id="conversionByAttendance" class="conversion-grid"></div>
         </div>
+      </div>
+      <div class="monthly-table-heading"><div><p class="mini-title">Indicadores mensuales · últimos 12 meses</p><p class="context">Conversión y ticket usan únicamente cohortes con 30 días completos.</p></div></div>
+      <div class="table-scroll">
+        <table class="monthly-table">
+          <thead><tr><th>Mes</th><th>Pruebas</th><th>Show rate</th><th>0 asistencias</th><th>1 asistencia</th><th>2+ asistencias</th><th>Conversión total</th><th>Ticket promedio</th><th>Paquete principal</th></tr></thead>
+          <tbody id="trialMonthlyTable"></tbody>
+        </table>
       </div>
     </section>
 
@@ -195,7 +204,7 @@
     <p id="updatedLabel"></p>
   </footer>
 
-  <script src="data.js?v=20261011-2"></script>
-  <script src="app.js?v=20261011-2"></script>
+  <script src="data.js?v=20261011-3"></script>
+  <script src="app.js?v=20261011-3"></script>
 </body>
 </html>
