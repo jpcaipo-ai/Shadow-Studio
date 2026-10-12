@@ -402,16 +402,17 @@
     }));
 
     const renewal = funnel.renewal_probability || {}, gap = funnel.renewal_gap_stats || {};
-    const renewalTicket = 400;
     const expectedRenewals = (renewal.due_unique_clients || 0) * (renewal.rate_90 || 0);
     setText("dueValue", integer.format(renewal.due_unique_clients || 0));
     setText("retainedValue", percent.format(renewal.rate_30 || 0));
     setText("fugueValue", percent.format(renewal.rate_90 || 0));
-    setText("renewalTicketValue", currency.format(renewalTicket));
+    setText("renewalTicketValue", currency.format(renewal.projected_avg_ticket || 0));
+    setText("renewalMedianValue", currency.format(renewal.projected_median_ticket || 0));
     setText("churnValue", integer.format(Math.round(expectedRenewals)));
-    setText("renewalPipelineValue", currency.format((renewal.due_unique_clients || 0) * renewalTicket));
-    setText("renewalExpectedValue", currency.format(expectedRenewals * renewalTicket));
+    setText("renewalPipelineValue", currency.format(renewal.projected_gross_value || 0));
+    setText("renewalExpectedValue", currency.format(renewal.projected_expected_value || 0));
     setText("renewalValue", percent.format(gap.within_90d || 0));
+    setText("renewalNote", `${renewal.valuation_method || "Último paquete pagado por cliente"}. El valor esperado aplica la probabilidad histórica a 90 días. Ese corte captura ${percent.format(gap.within_90d || 0)} de los retornos observados.`);
 
     const lifecycleOrder = ["Nuevo: 1 pago <=60d", "Activo recurrente", "Activo de 1 compra", "En seguimiento 91-180d", "En riesgo 181-365d", "Inactivo >365d"];
     const lifeMax = Math.max(...Object.values(data.lifecycle));
