@@ -31,16 +31,19 @@ El archivo `data.js` contiene los agregados utilizados por el dashboard. Sustit�
 - `app.js`: filtros, cálculos, gráficas SVG y exportación CSV.
 - `data.js`: datos agregados del análisis.
 
-## Nota sobre churn
+## Embudo y renovación
 
-La fuga incluida es provisional y corresponde al cruce entre las fotografías del 30 de septiembre y el 3 de octubre de 2026. Para churn mensual real se necesita un historial de vencimientos, renovaciones y cancelaciones con una ventana de gracia definida.
+El tablero cruza ventas, clases de prueba y asistencias sin exponer datos personales. La conversión de prueba se define como la compra de un paquete dentro de los 30 días posteriores. Las cohortes con menos de 30 días se muestran como inmaduras.
+
+La probabilidad de renovación se calcula sobre vencimientos históricos maduros a 30 y 90 días. Los vencimientos próximos usan la fecha final real de cada membresía. El export de asistencias no contiene fecha de reserva, inasistencias ni aforo configurado; por eso la capacidad muestra carga observada y no ocupación o anticipación de agenda.
 
 ## Customer lifecycle
 
 El lifecycle se calcula por cliente-mes y responde a los filtros del tablero:
 
 - **Nuevo:** primera compra observada del cliente.
-- **Continuo:** vuelve a comprar en un máximo de 90 días desde su compra anterior.
-- **Reactivado:** vuelve a comprar después de más de 90 días.
+- **Renovación continua:** compra hasta 90 días después del vencimiento de la membresía anterior.
+- **Reactivación:** compra entre 91 días y un año después del vencimiento.
+- **Resurrección:** compra más de un año después del vencimiento.
 
-Enero de 2025 es la primera observación disponible y debe interpretarse como línea base, no como adquisición confirmada. Este análisis es independiente del churn: una reactivación se determina por el intervalo entre compras, mientras que la fuga requiere vencimiento y ausencia de renovación dentro de una ventana de gracia.
+La frontera de 90 días captura aproximadamente 90% de los retornos observados; una ventana de 30 días dejaría fuera una parte material de las renovaciones tardías.

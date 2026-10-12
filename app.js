@@ -2,6 +2,7 @@
   "use strict";
 
   const data = window.SHADOW_GROWTH_DATA;
+  const funnel = data.funnel || {};
   const $ = (id) => document.getElementById(id);
   const currency = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", maximumFractionDigits: 0 });
   const integer = new Intl.NumberFormat("es-PE", { maximumFractionDigits: 0 });
@@ -111,6 +112,11 @@
     return data.months.filter(month => month.key >= range.start.slice(0, 7) && month.key <= range.end.slice(0, 7));
   }
 
+  function rowsInVisibleMonths(rows = []) {
+    const keys = new Set(visibleMonths().map(month => month.key));
+    return rows.filter(row => keys.has(row.month));
+  }
+
   function setText(id, value) { $(id).textContent = value; }
   function updateKpis(row) {
     const revenue = row[4], transactions = row[5], payers = row[6], newPayers = row[7];
@@ -209,10 +215,10 @@
 
   function renderLifecycleMonthlyChart(container, rows) {
     if (!rows.length) { container.innerHTML = '<div class="empty">Sin datos para la selección.</div>'; return; }
-    const { svg, width, height } = makeSvg(container, 330, "Clientes nuevos, continuos y reactivados por mes");
+    const { svg, width, height } = makeSvg(container, 330, "Nuevos, renovaciones, reactivaciones y resurrecciones por mes");
     const margin = { top: 18, right: 18, bottom: 42, left: 54 };
     const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
-    const max = Math.max(...rows.map(d => d.newCount + d.continuousCount + d.reactivatedCount), 1) * 1.08;
+    const max = Math.max(...rows.map(d => d.newCount + d.continuousCount + d.reactivatedCount + d.resurrectedCount), 1) * 1.08;
     const y = scaleLinear(max, margin.top + plotH, margin.top);
     const band = plotW / rows.length, barW = Math.max(10, Math.min(38, band * .64));
     for (let i = 0; i <= 4; i++) {
@@ -223,8 +229,9 @@
     rows.forEach((d, i) => {
       const x = margin.left + i * band + (band - barW) / 2;
       const segments = [
-        ["Continuo", d.continuousCount, "var(--green)"],
-        ["Reactivado", d.reactivatedCount, "var(--purple)"],
+        ["Renovación", d.continuousCount, "var(--green)"],
+        ["Reactivación", d.reactivatedCount, "var(--purple)"],
+        ["Resurrección", d.resurrectedCount, "var(--gold)"],
         ["Nuevo", d.newCount, "var(--blue)"],
       ];
       let cumulative = 0;
@@ -236,6 +243,68 @@
       });
       if (rows.length <= 12 || i % 2 === 0 || i === rows.length - 1) svg.append(svgEl("text", { x: x + barW / 2, y: height - 14, "text-anchor": "middle", class: "axis" }, d.label));
     });
+  }
+
+  function renderFunnelChart(container, rows) {
+    if (!rows.length) { container.innerHTML = '<div class="empty">Sin cohortes de prueba para el periodo.</div>'; return; }
+    const { svg, width, height } = makeSvg(container, 310, "Pruebas, asistencias y conversiones por cohorte mensual");
+    const margin = { top: 18, right: 18, bottom: 42, left: 48 };
+    const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
+    const max = Math.max(...rows.map(d => d.trial_customers), 1) * 1.08;
+    const y = scaleLinear(max, margin.top + plotH, margin.top);
+    const band = plotW / rows.length, groupW = Math.max(18, Math.min(62, band * .72)), barW = groupW / 3;
+    for (let i = 0; i <= 4; i++) {
+      const value = max * i / 4, yy = y(value);
+      svg.append(svgEl("line", { x1: margin.left, y1: yy, x2: width - margin.right, y2: yy, class: "gridline" }));
+      svg.append(svgEl("text", { x: margin.left - 8, y: yy + 4, "text-anchor": "end", class: "axis" }, integer.format(value)));
+    }
+    rows.forEach((d, i) => {
+      const startX = margin.left + i * band + (band - groupW) / 2;
+      [["Pruebas", d.trial_customers, "var(--blue)"], ["Asistieron", d.attended, "var(--mint)"], ["Compraron ≤30d", d.converted_30d, "var(--green)"]].forEach(([name, value, color], j) => {
+        const rect = svgEl("rect", { x: startX + j * barW, y: y(value), width: Math.max(3, barW - 2), height: Math.max(0, margin.top + plotH - y(value)), rx: 2, fill: color, class: "bar", tabindex: "0" });
+        rect.append(svgEl("title", {}, `${d.month} · ${name}: ${integer.format(value)}`)); svg.append(rect);
+      });
+      if (rows.length <= 12 || i % 2 === 0 || i === rows.length - 1) svg.append(svgEl("text", { x: startX + groupW / 2, y: height - 14, "text-anchor": "middle", class: "axis" }, d.month.slice(5)));
+    });
+  }
+
+  function renderFunnel() {
+    const rows = rowsInVisibleMonths(funnel.trial_monthly);
+    const totals = rows.reduce((acc, row) => {
+      acc.trials += row.trial_customers; acc.attended += row.attended; acc.matured += row.matured_30d; acc.converted += row.converted_30d;
+      if (row.median_days_to_purchase != null && row.converted_30d) { acc.days += row.median_days_to_purchase * row.converted_30d; acc.daysWeight += row.converted_30d; }
+      return acc;
+    }, { trials: 0, attended: 0, matured: 0, converted: 0, days: 0, daysWeight: 0 });
+    setText("trialCustomersKpi", integer.format(totals.trials));
+    setText("trialAttendanceKpi", integer.format(totals.attended));
+    setText("trialAttendanceRateKpi", totals.trials ? `${percent.format(totals.attended / totals.trials)} de las pruebas` : "Sin pruebas");
+    setText("trialConvertedKpi", integer.format(totals.converted));
+    setText("trialConversionKpi", totals.matured ? percent.format(totals.converted / totals.matured) : "Cohorte inmadura");
+    setText("trialDaysKpi", totals.daysWeight ? `${(totals.days / totals.daysWeight).toFixed(1)} días` : "—");
+    renderFunnelChart($("funnelMonthlyChart"), rows);
+
+    const groups = new Map(["0 clases", "1 clase", "2+ clases"].map(name => [name, { customers: 0, converted: 0, value: 0 }]));
+    rowsInVisibleMonths(funnel.trial_conversion_by_attendance_monthly).forEach(row => {
+      const group = groups.get(row.group); if (!group) return;
+      group.customers += row.trial_customers; group.converted += row.converted_30d;
+      if (row.avg_first_package != null) group.value += row.avg_first_package * row.converted_30d;
+    });
+    $("conversionByAttendance").replaceChildren(...[...groups].map(([name, value]) => {
+      const item = document.createElement("div");
+      item.innerHTML = `<span>${name}</span><strong>${value.customers ? percent.format(value.converted / value.customers) : "—"}</strong><small>${integer.format(value.converted)} de ${integer.format(value.customers)} · ticket ${value.converted ? currency.format(value.value / value.converted) : "—"}</small>`;
+      return item;
+    }));
+  }
+
+  function renderOperations() {
+    const two = rowsInVisibleMonths(funnel.two_for_one?.monthly);
+    const t = two.reduce((a, r) => ({ purchases: a.purchases + r.purchases, zero: a.zero + r.attended_zero, one: a.one + r.attended_one, both: a.both + r.used_both, follow: a.follow + r.follow_on }), { purchases: 0, zero: 0, one: 0, both: 0, follow: 0 });
+    setText("twoPurchasesKpi", integer.format(t.purchases)); setText("twoBothKpi", integer.format(t.both)); setText("twoOneKpi", integer.format(t.one)); setText("twoZeroKpi", integer.format(t.zero)); setText("twoFollowKpi", integer.format(t.follow));
+    setText("twoForOneNote", t.purchases ? `${percent.format(t.both / t.purchases)} utilizó ambas clases. La conversión posterior necesita 60 días completos para consolidarse.` : "La promoción 2×1 solo aparece desde septiembre de 2026.");
+
+    const attendance = rowsInVisibleMonths(funnel.attendance_monthly);
+    const a = attendance.reduce((acc, r) => ({ attendances: acc.attendances + r.attendances, clients: acc.clients + r.unique_clients, sessions: acc.sessions + r.sessions, p90: Math.max(acc.p90, r.p90_attendees_session || 0) }), { attendances: 0, clients: 0, sessions: 0, p90: 0 });
+    setText("attendanceTotalKpi", integer.format(a.attendances)); setText("attendanceClientsKpi", integer.format(a.clients)); setText("attendanceSessionsKpi", integer.format(a.sessions)); setText("attendanceAvgKpi", a.sessions ? (a.attendances / a.sessions).toFixed(1) : "—"); setText("attendanceP90Kpi", a.sessions ? integer.format(a.p90) : "—");
   }
 
   function renderHorizontalBars(container, rows, color, label) {
@@ -268,20 +337,17 @@
     renderLineChart($("revenueChart"), trendRows);
     renderMixChart($("customerMixChart"), mixRows);
 
-    const lifecycleRows = months.map(month => {
-      const row = getLifecycleMonth(month.label);
-      return { label: month.label, newCount: row[4], continuousCount: row[5], reactivatedCount: row[6] };
-    });
+    const lifecycleRows = rowsInVisibleMonths(funnel.lifecycle_monthly).map(row => ({ label: monthByLabel.get([...monthByLabel.keys()].find(label => monthByLabel.get(label).key === row.month))?.label || row.month, newCount: row["Nuevo observado"] || 0, continuousCount: row["Renovación continua"] || 0, reactivatedCount: row["Reactivación"] || 0, resurrectedCount: row["Resurrección"] || 0 }));
     const lifecycleTotals = lifecycleRows.reduce((acc, row) => ({
       newCount: acc.newCount + row.newCount,
       continuousCount: acc.continuousCount + row.continuousCount,
       reactivatedCount: acc.reactivatedCount + row.reactivatedCount,
-    }), { newCount: 0, continuousCount: 0, reactivatedCount: 0 });
-    const recurrentLifecycle = lifecycleTotals.continuousCount + lifecycleTotals.reactivatedCount;
+      resurrectedCount: acc.resurrectedCount + row.resurrectedCount,
+    }), { newCount: 0, continuousCount: 0, reactivatedCount: 0, resurrectedCount: 0 });
     setText("newLifecycleKpi", integer.format(lifecycleTotals.newCount));
     setText("continuousLifecycleKpi", integer.format(lifecycleTotals.continuousCount));
     setText("reactivatedLifecycleKpi", integer.format(lifecycleTotals.reactivatedCount));
-    setText("reactivationShareKpi", recurrentLifecycle ? percent.format(lifecycleTotals.reactivatedCount / recurrentLifecycle) : "0%");
+    setText("resurrectedLifecycleKpi", integer.format(lifecycleTotals.resurrectedCount));
     renderLifecycleMonthlyChart($("lifecycleMonthlyChart"), lifecycleRows);
 
     const familyValues = data.families.filter(v => v !== "Todos" && (state.family === "Todos" || state.family === v))
@@ -302,11 +368,12 @@
       row.append(title, signalText, actionText); return row;
     }));
 
-    setText("dueValue", integer.format(data.renewal.due));
-    setText("retainedValue", integer.format(data.renewal.retained_or_renewed));
-    setText("fugueValue", integer.format(data.renewal.potential_fugue));
-    setText("churnValue", percent.format(data.renewal.provisional_churn));
-    setText("renewalValue", `${currency.format(data.renewal.matched_value)} · ${data.renewal.matched_last_payment}/13 identificados`);
+    const renewal = funnel.renewal_probability || {}, gap = funnel.renewal_gap_stats || {};
+    setText("dueValue", integer.format(renewal.due_unique_clients || 0));
+    setText("retainedValue", percent.format(renewal.rate_30 || 0));
+    setText("fugueValue", percent.format(renewal.rate_90 || 0));
+    setText("churnValue", integer.format(Math.round((renewal.due_unique_clients || 0) * (renewal.rate_90 || 0))));
+    setText("renewalValue", percent.format(gap.within_90d || 0));
 
     const lifecycleOrder = ["Nuevo: 1 pago <=60d", "Activo recurrente", "Activo de 1 compra", "En seguimiento 91-180d", "En riesgo 181-365d", "Inactivo >365d"];
     const lifeMax = Math.max(...Object.values(data.lifecycle));
@@ -345,6 +412,8 @@
     setText("coverageLabel", `${range.start} a ${range.end} · Fuente: ${data.coverage}`);
     updateKpis(getSummary());
     renderCharts();
+    renderFunnel();
+    renderOperations();
   }
 
   const safeCsvCell = value => {
@@ -384,7 +453,7 @@
   $("exportButton").addEventListener("click", exportCsv);
   $("exportTransactionsButton").addEventListener("click", exportTransactionsCsv);
   let resizeTimer;
-  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderCharts, 120); });
+  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderCharts(); renderFunnel(); }, 120); });
 
   setText("updatedLabel", `Corte del tablero: ${data.generatedAt}`);
   renderStaticSections();

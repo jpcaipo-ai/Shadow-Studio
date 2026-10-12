@@ -78,24 +78,49 @@
       </article>
     </section>
 
+    <section class="panel funnel-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Embudo de adquisición</p>
+          <h2>Clase de prueba → asistencia → paquete</h2>
+          <p class="context">Conversión: compra de un paquete pagado dentro de 30 días. Las cohortes recientes se muestran como provisionales.</p>
+        </div>
+      </div>
+      <div class="funnel-kpis" aria-live="polite">
+        <div><span>Pruebas</span><strong id="trialCustomersKpi">—</strong><small>clientes de la cohorte</small></div>
+        <div><span>Asistieron</span><strong id="trialAttendanceKpi">—</strong><small id="trialAttendanceRateKpi">—</small></div>
+        <div><span>Compraron</span><strong id="trialConvertedKpi">—</strong><small>dentro de 30 días</small></div>
+        <div><span>Conversión</span><strong id="trialConversionKpi">—</strong><small>solo cohortes maduras</small></div>
+        <div><span>Tiempo a compra</span><strong id="trialDaysKpi">—</strong><small>mediana en días</small></div>
+      </div>
+      <div class="funnel-layout">
+        <div id="funnelMonthlyChart" class="chart funnel-chart" role="img" aria-label="Embudo mensual de clases de prueba"></div>
+        <div>
+          <p class="mini-title">Conversión según asistencia</p>
+          <div id="conversionByAttendance" class="conversion-grid"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="panel lifecycle-panel">
       <div class="section-heading lifecycle-heading">
         <div>
           <p class="eyebrow">Customer lifecycle</p>
-          <h2>Nuevos, continuos y reactivados</h2>
-          <p class="context lifecycle-definition">Continuo: regresó en hasta 90 días. Reactivado: volvió después de más de 90 días. Enero 2025 representa la primera observación disponible.</p>
+          <h2>Nuevos, renovación, reactivación y resurrección</h2>
+          <p class="context lifecycle-definition">Renovación: siguiente compra hasta 90 días después del vencimiento. Reactivación: 91–365 días. Resurrección: más de un año.</p>
         </div>
         <div class="legend lifecycle-legend">
           <span><i class="dot new"></i>Nuevo</span>
-          <span><i class="dot recurring"></i>Continuo</span>
-          <span><i class="dot reactivated"></i>Reactivado</span>
+          <span><i class="dot recurring"></i>Renovación</span>
+          <span><i class="dot reactivated"></i>Reactivación</span>
+          <span><i class="dot resurrected"></i>Resurrección</span>
         </div>
       </div>
       <div class="lifecycle-kpis" aria-live="polite">
         <div><span>Nuevos</span><strong id="newLifecycleKpi">—</strong><small>clientes-mes</small></div>
-        <div><span>Continuos</span><strong id="continuousLifecycleKpi">—</strong><small>clientes-mes</small></div>
-        <div><span>Reactivados</span><strong id="reactivatedLifecycleKpi">—</strong><small>clientes-mes</small></div>
-        <div><span>Reactivación</span><strong id="reactivationShareKpi">—</strong><small>de recurrentes</small></div>
+        <div><span>Renovaciones</span><strong id="continuousLifecycleKpi">—</strong><small>compras del periodo</small></div>
+        <div><span>Reactivaciones</span><strong id="reactivatedLifecycleKpi">—</strong><small>compras del periodo</small></div>
+        <div><span>Resurrecciones</span><strong id="resurrectedLifecycleKpi">—</strong><small>compras del periodo</small></div>
       </div>
       <div id="lifecycleMonthlyChart" class="chart lifecycle-monthly-chart" role="img" aria-label="Gráfico mensual de clientes nuevos, continuos y reactivados"></div>
     </section>
@@ -106,15 +131,40 @@
         <div id="opportunityList"></div>
       </article>
       <article class="panel renewal">
-        <div class="section-heading"><div><p class="eyebrow">Snapshot</p><h2>Renovación y fuga</h2></div><span class="status">Provisional</span></div>
+        <div class="section-heading"><div><p class="eyebrow">Renovación</p><h2>Vencimientos y probabilidad</h2></div><span class="status">Ventana 90 días</span></div>
         <dl class="metric-list">
-          <div><dt>Membresías por vencer</dt><dd id="dueValue">—</dd></div>
-          <div><dt>Renovadas o retenidas</dt><dd id="retainedValue">—</dd></div>
-          <div><dt>Fugas potenciales</dt><dd id="fugueValue">—</dd></div>
-          <div class="critical"><dt>Churn provisional</dt><dd id="churnValue">—</dd></div>
-          <div><dt>Último pago asociado</dt><dd id="renewalValue">—</dd></div>
+          <div><dt>Clientes por vencer, próximos 30 días</dt><dd id="dueValue">—</dd></div>
+          <div><dt>Probabilidad de renovar en 30 días</dt><dd id="retainedValue">—</dd></div>
+          <div><dt>Probabilidad de renovar en 90 días</dt><dd id="fugueValue">—</dd></div>
+          <div><dt>Renovaciones esperadas</dt><dd id="churnValue">—</dd></div>
+          <div><dt>Retornos capturados a 90 días</dt><dd id="renewalValue">—</dd></div>
         </dl>
-        <p class="notice">La fuga no se calcula por ausencia de pago. Requiere vencimiento, no renovación y una ventana de gracia acordada.</p>
+        <p class="notice">El corte de 90 días captura 90.2% de los retornos observados; 30 días dejaría fuera una parte material.</p>
+      </article>
+    </section>
+
+    <section class="operations-grid">
+      <article class="panel">
+        <div class="section-heading"><div><p class="eyebrow">Promoción 2×1</p><h2>Uso de las dos clases</h2></div></div>
+        <dl class="metric-list">
+          <div><dt>Compras</dt><dd id="twoPurchasesKpi">—</dd></div>
+          <div><dt>Usaron las dos clases</dt><dd id="twoBothKpi">—</dd></div>
+          <div><dt>Usaron una clase</dt><dd id="twoOneKpi">—</dd></div>
+          <div><dt>No asistieron todavía</dt><dd id="twoZeroKpi">—</dd></div>
+          <div><dt>Compraron otro paquete ≤60 días</dt><dd id="twoFollowKpi">—</dd></div>
+        </dl>
+        <p id="twoForOneNote" class="notice"></p>
+      </article>
+      <article class="panel">
+        <div class="section-heading"><div><p class="eyebrow">Capacidad</p><h2>Asistencias y carga de clases</h2></div></div>
+        <dl class="metric-list">
+          <div><dt>Asistencias</dt><dd id="attendanceTotalKpi">—</dd></div>
+          <div><dt>Clientes-mes</dt><dd id="attendanceClientsKpi">—</dd></div>
+          <div><dt>Sesiones dictadas</dt><dd id="attendanceSessionsKpi">—</dd></div>
+          <div><dt>Promedio por sesión</dt><dd id="attendanceAvgKpi">—</dd></div>
+          <div><dt>Percentil 90 por sesión</dt><dd id="attendanceP90Kpi">—</dd></div>
+        </dl>
+        <p class="notice">El export no contiene aforo configurado ni fecha de creación de la reserva. Por eso se muestra carga observada, no porcentaje de ocupación ni anticipación de agenda.</p>
       </article>
     </section>
 
@@ -131,11 +181,11 @@
   </main>
 
   <footer>
-    <p>Fuente: exports de clientes, ingresos y membresías de Shadow Studio. Octubre 2026 contiene solo tres días.</p>
+    <p>Fuente: exports de clientes, ventas, pruebas y asistencias de Shadow Studio. Octubre 2026 contiene datos hasta el día 11.</p>
     <p id="updatedLabel"></p>
   </footer>
 
   <script src="data.js"></script>
-  <script src="app.js?v=20261005-2"></script>
+  <script src="app.js?v=20261011-1"></script>
 </body>
 </html>
