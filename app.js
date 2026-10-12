@@ -320,11 +320,16 @@
       addCell(row, month.month);
       addCell(row, integer.format(month.trial_customers));
       addCell(row, percent.format(month.attendance_rate || 0), `${integer.format(month.attended)} asistieron`);
-      addCell(row, `${integer.format(month.zero_attendance)} · ${percent.format(month.zero_attendance_rate || 0)}`, zero ? `Conv. ${percent.format(zero.conversion_30d || 0)}` : "Conv. pendiente");
-      addCell(row, `${integer.format(month.one_attendance)} · ${percent.format(month.one_attendance_rate || 0)}`, one ? `Conv. ${percent.format(one.conversion_30d || 0)}` : "Conv. pendiente");
-      addCell(row, `${integer.format(month.two_plus_attendance)} · ${percent.format(month.two_plus_attendance_rate || 0)}`, two ? `Conv. ${percent.format(two.conversion_30d || 0)}` : "Conv. pendiente");
-      if (month.matured_30d) addCell(row, percent.format(month.conversion_30d || 0), `${integer.format(month.converted_30d)} de ${integer.format(month.matured_30d)} maduras`);
-      else addCell(row, "Inmadura", "Aún no cumple 30 días", "immature");
+      addCell(row, `${integer.format(month.zero_attendance)} · ${percent.format(month.zero_attendance_rate || 0)}`, zero ? `Compraron ${integer.format(zero.converted_30d)} · Conv. ${percent.format(zero.conversion_30d || 0)}` : "Conversión pendiente");
+      addCell(row, `${integer.format(month.one_attendance)} · ${percent.format(month.one_attendance_rate || 0)}`, one ? `Compraron ${integer.format(one.converted_30d)} · Conv. ${percent.format(one.conversion_30d || 0)}` : "Conversión pendiente");
+      addCell(row, `${integer.format(month.two_plus_attendance)} · ${percent.format(month.two_plus_attendance_rate || 0)}`, two ? `Compraron ${integer.format(two.converted_30d)} · Conv. ${percent.format(two.conversion_30d || 0)}` : "Conversión pendiente");
+      if (month.matured_30d) {
+        addCell(row, integer.format(month.converted_30d), `${integer.format(month.matured_30d)} cohortes maduras`);
+        addCell(row, percent.format(month.conversion_30d || 0));
+      } else {
+        addCell(row, "Pendiente", "Aún no cumple 30 días", "immature");
+        addCell(row, "Inmadura", "Aún no cumple 30 días", "immature");
+      }
       addCell(row, month.avg_first_package != null ? currency.format(month.avg_first_package) : "—");
       addCell(row, month.top_package || "—", month.top_package ? `${integer.format(month.top_package_buyers)} compradores · ${percent.format(month.top_package_share || 0)}` : "");
       return row;
@@ -361,13 +366,6 @@
     setText("twoPurchasesKpi", integer.format(t.purchases)); setText("twoBothKpi", integer.format(t.both)); setText("twoOneKpi", integer.format(t.one)); setText("twoZeroKpi", integer.format(t.zero)); setText("twoFollowKpi", integer.format(t.follow));
     setText("twoForOneNote", t.purchases ? `${percent.format(t.both / t.purchases)} utilizó ambas clases. La conversión posterior necesita 60 días completos para consolidarse.` : "La promoción 2×1 solo aparece desde septiembre de 2026.");
     renderTrialVolumeChart($("trialVolumeMonthlyChart"), volumeMonthly);
-    $("trialVolumeTable").replaceChildren(...[...volumeMonthly].reverse().map(month => {
-      const row = document.createElement("tr");
-      [month.month, month.total_trials, month.free_pass, month.two_for_one, month.unique_clients].forEach((value, index) => {
-        const cell = document.createElement("td"); cell.textContent = index ? integer.format(value) : value; row.append(cell);
-      });
-      return row;
-    }));
 
     const attendance = rowsInVisibleMonths(funnel.attendance_monthly);
     const a = attendance.reduce((acc, r) => ({ attendances: acc.attendances + r.attendances, clients: acc.clients + r.unique_clients, sessions: acc.sessions + r.sessions, p90: Math.max(acc.p90, r.p90_attendees_session || 0) }), { attendances: 0, clients: 0, sessions: 0, p90: 0 });
