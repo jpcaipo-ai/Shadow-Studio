@@ -98,28 +98,64 @@
     const cutoffIso = maturityCutoff.toISOString().slice(0, 10);
     let latestFullMonth = cutoffIso.slice(0, 7);
     if (monthEnd(latestFullMonth) > cutoffIso) latestFullMonth = shiftMonth(latestFullMonth, -1);
-    const months = Array.from({ length: 24 }, (_, index) => shiftMonth(latestFullMonth, index - 23));
+    const currentMonth = data.generatedAt.slice(0, 7);
+    const months = Array.from({ length: 24 }, (_, index) => shiftMonth(currentMonth, index - 23));
 
     const dimensionMatch = row => (currentFilters.discipline === "Todos" || row[TX.disciplines].includes(currentFilters.discipline))
       && (currentFilters.instructor === "Todos" || row[TX.instructor] === currentFilters.instructor)
       && (currentFilters.family === "Todos" || row[TX.family] === currentFilters.family);
 
-    const cohorts = new Map(months.map(month => [month, Array.from({ length: 3 }, () => ({ due: 0, renewed: 0 }))]));
-    data.transactions.forEach(row => {
-      if (!row[TX.effectiveDue] || !row[TX.effectiveMature30] || !dimensionMatch(row)) return;
-      const month = row[TX.effectiveDue].slice(0, 7);
-      if (!cohorts.has(month)) return;
-      const index = purchaseIndex.get(row) || 0;
-      const band = index === 0 ? 0 : index === 1 ? 1 : 2;
-      const result = cohorts.get(month)[band];
-      result.due += 1;
-      result.renewed += row[TX.effectiveRenew30] ? 1 : 0;
+    const bandOf = row => { const index = purchaseIndex.get(row) || 0; return index === 0 ? 0 : index === 1 ? 1 : 2; };
+    const historicRates = [0, 1, 2].map(band => {
+      const base = data.transactions.filter(row => row[TX.effectiveMature30] && bandOf(row) === band);
+      return base.length ? base.filter(row => row[TX.effectiveRenew30]).length / base.length : 0;
     });
+    const cohorts = new Map(months.map(month => [month, []]));
+    months.forEach(month => {
+      const latestByCustomer = new Map();
+      data.transactions.forEach(row => {
+        if (!row[TX.effectiveDue]?.startsWith(month) || !dimensionMatch(row)) return;
+        const existing = latestByCustomer.get(row[TX.customer]);
+        if (!existing || row[TX.date] > existing[TX.date]) latestByCustomer.set(row[TX.customer], row);
+      });
+      cohorts.set(month, [...latestByCustomer.values()]);
+    });
+    const stats = (rows, band) => {
+      const selected = rows.filter(row => bandOf(row) === band);
+      const gross = sumValues(selected, TX.value);
+      return {
+        due: selected.length,
+        renewed: selected.filter(row => row[TX.effectiveRenew30]).length,
+        gross,
+        expected: gross * historicRates[band],
+      };
+    };
+    function sumValues(rows, index) { return rows.reduce((total, row) => total + Number(row[index] || 0), 0); }
 
-    const latest = cohorts.get(latestFullMonth);
+    const latest = [0, 1, 2].map(band => stats(cohorts.get(latestFullMonth), band));
     const labels = ["Primera renovación", "Segunda renovación", "Tercera o más"];
     const coverage = data.effectiveRenewal ? percent.format(data.effectiveRenewal.knownClassLimitCoverage) : "—";
-    $("renewalDepthContext").textContent = `Último mes completo: ${monthLabel(latestFullMonth)}. Fecha efectiva = fin contractual o clases agotadas. Cupo identificable en ${coverage} de ciclos.`;
+    $("renewalDepthContext").textContent = `Último mes completo: ${monthLabel(latestFullMonth)}. Fecha efectiva = fin contractual o clases agotadas. Cupo identificable en ${coverage}. Tasas modelo: 1.ª ${percent.format(historicRates[0])}, 2.ª ${percent.format(historicRates[1])}, 3.ª+ ${percent.format(historicRates[2])}.`;
+
+    const currentRows = cohorts.get(currentMonth);
+    const currentStats = [0, 1, 2].map(band => stats(currentRows, band));
+    const currentGross = currentStats.reduce((total, value) => total + value.gross, 0);
+    const currentExpected = currentStats.reduce((total, value) => total + value.expected, 0);
+    const currentRenewed = currentStats.reduce((total, value) => total + value.renewed, 0);
+    const forecast = [
+      ["Clientes por renovar", integer.format(currentRows.length), monthLabel(currentMonth)],
+      ["Valor bruto", currency.format(currentGross), "Última membresía comprada"],
+      ["Valor esperado", currency.format(currentExpected), "Probabilidad por profundidad"],
+      ["Ya renovaron al corte", integer.format(currentRenewed), `${percent.format(currentRows.length ? currentRenewed / currentRows.length : 0)} de la cartera`],
+    ];
+    $("renewalForecastCards").replaceChildren(...forecast.map(([label, value, note]) => {
+      const card = document.createElement("article"); card.className = "renewal-forecast-card";
+      const title = document.createElement("span"); title.textContent = label;
+      const amount = document.createElement("strong"); amount.textContent = value;
+      const detail = document.createElement("p"); detail.textContent = note;
+      card.append(title, amount, detail); return card;
+    }));
+
     $("renewalDepthCards").replaceChildren(...labels.map((label, index) => {
       const value = latest[index];
       const card = document.createElement("article");
@@ -129,7 +165,7 @@
       const rate = document.createElement("strong");
       rate.textContent = value.due ? percent.format(value.renewed / value.due) : "Sin casos";
       const detail = document.createElement("p");
-      detail.textContent = `${integer.format(value.renewed)} renovaron de ${integer.format(value.due)} que vencieron`;
+      detail.textContent = `${integer.format(value.renewed)} de ${integer.format(value.due)} · bruto ${currency.format(value.gross)} · esperado ${currency.format(value.expected)}`;
       card.append(title, rate, detail);
       return card;
     }));
@@ -137,10 +173,18 @@
     const rows = [...months].reverse().map(month => {
       const row = document.createElement("tr");
       cell(row, monthLabel(month));
-      cohorts.get(month).forEach(value => {
+      const complete = monthEnd(month) <= cutoffIso;
+      const status = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.className = `renewal-status${complete ? "" : " provisional"}`;
+      badge.textContent = complete ? "Maduro" : "Provisional";
+      status.appendChild(badge); row.appendChild(status);
+      [0, 1, 2].map(band => stats(cohorts.get(month), band)).forEach(value => {
         cell(row, integer.format(value.due));
         cell(row, integer.format(value.renewed));
         cell(row, value.due ? percent.format(value.renewed / value.due) : "—");
+        cell(row, currency.format(value.gross));
+        cell(row, currency.format(value.expected));
       });
       return row;
     });

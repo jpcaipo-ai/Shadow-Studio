@@ -32,6 +32,26 @@
   margin-bottom: 14px;
 }
 
+.renewal-forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.renewal-forecast-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: #28143a;
+  color: #fff;
+}
+
+.renewal-forecast-card span { display: block; color: #d8c8e3; font-size: 11px; font-weight: 800; }
+.renewal-forecast-card strong { display: block; margin: 7px 0 3px; font-size: 26px; letter-spacing: -.04em; }
+.renewal-forecast-card p { margin: 0; color: #d8c8e3; font-size: 11px; }
+.renewal-status { display: inline-block; border-radius: 999px; padding: 4px 7px; background: var(--lav); color: var(--purple); font-size: 10px; font-weight: 800; }
+.renewal-status.provisional { background: #fff1d8; color: #8a5b05; }
+
 .renewal-depth-card {
   background: linear-gradient(145deg, #fff, #faf7fc);
   border: 1px solid var(--line);
@@ -52,8 +72,10 @@
 @media (max-width: 1100px) {
   .lifecycle-compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .renewal-depth-grid { grid-template-columns: 1fr; }
+  .renewal-forecast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
   .lifecycle-compare-grid { grid-template-columns: 1fr; }
+  .renewal-forecast-grid { grid-template-columns: 1fr; }
 }
