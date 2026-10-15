@@ -4,13 +4,14 @@ Dashboard web estático construido con HTML, CSS y JavaScript nativo. No necesit
 
 ## Uso local
 
-Abre `index.html` directamente en el navegador.
+Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server 8765`) y abre `http://127.0.0.1:8765/`.
 
 ## Filtros y exportación
 
 - El filtro **Periodo o mes** comienza en el mes más reciente disponible y ordena los meses hacia atrás. Después muestra periodos predefinidos y la opción **Personalizado** para elegir una fecha inicial y final.
-- **Exportar vista CSV** descarga el resumen mensual de la selección actual.
+- **Exportar resumen** descarga los KPI y alertas principales de la selección actual.
 - **Exportar transacciones** descarga las transacciones que cumplen todos los filtros activos.
+- Los filtros de disciplina y profesor modifican realmente los KPI, gráficas y tablas; no son controles decorativos.
 - La versión web pública no incluye nombres ni DNI. Cada cliente utiliza un código anónimo para conservar los cálculos de pagadores únicos, recurrencia y lifecycle.
 
 ## Publicación en GitHub Pages
@@ -22,7 +23,7 @@ Abre `index.html` directamente en el navegador.
 
 ## Actualización de datos
 
-El archivo `data.js` contiene los agregados utilizados por el dashboard. Sustitúyelo cuando se genere un nuevo corte de datos, conservando la misma estructura.
+El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente llega al **15 de octubre de 2026**.
 
 ## Estructura
 
@@ -37,17 +38,23 @@ El tablero cruza ventas, clases de prueba y asistencias sin exponer datos person
 
 El volumen de clases de prueba agrupa Free Pass y 2×1, con desglose mensual por fecha de venta. El análisis de uso de ambas clases se mantiene separado y aplica únicamente al 2×1.
 
-La probabilidad de renovación se calcula sobre vencimientos históricos maduros a 30 y 90 días. Los vencimientos próximos usan la fecha final real de cada membresía. El export de asistencias no contiene fecha de reserva, inasistencias ni aforo configurado; por eso la capacidad muestra carga observada y no ocupación o anticipación de agenda.
+La probabilidad de renovación se calcula sobre vencimientos históricos maduros. Los vencimientos próximos usan la fecha final real de cada membresía. El export de asistencias no contiene fecha de reserva, inasistencias ni aforo configurado; por eso la capacidad muestra carga observada y no ocupación o anticipación de agenda.
 
-La valorización de renovaciones usa, cliente por cliente, el importe de su último paquete pagado. Cada cliente próximo a vencer se cuenta una sola vez. El tablero muestra tanto la cartera potencial como la facturación esperada ajustada por la probabilidad histórica de renovación a 90 días.
+La valorización de renovaciones usa, cliente por cliente, el importe de su último paquete pagado. Cada cliente próximo a vencer se cuenta una sola vez. El tablero muestra la cartera potencial y la facturación esperada ajustada por la probabilidad histórica de renovación a 30 días.
 
 ## Customer lifecycle
 
 El lifecycle se calcula por cliente-mes y responde a los filtros del tablero:
 
 - **Nuevo:** primera compra observada del cliente.
-- **Renovación continua:** compra hasta 90 días después del vencimiento de la membresía anterior.
-- **Reactivación:** compra entre 91 días y un año después del vencimiento.
+- **Renovación continua:** compra hasta 30 días después del vencimiento de la membresía anterior.
+- **Reactivación:** compra entre 31 días y un año después del vencimiento.
 - **Resurrección:** compra más de un año después del vencimiento.
 
-La frontera de 90 días captura aproximadamente 90% de los retornos observados; una ventana de 30 días dejaría fuera una parte material de las renovaciones tardías.
+El tablero conserva además la tasa a 90 días como referencia diagnóstica, pero la clasificación operativa usa el umbral de 30 días solicitado.
+
+## Comparaciones y metas
+
+- Octubre 2026 se compara contra **los mismos días** de octubre 2025 para evitar sesgo por mes incompleto.
+- El forecast mensual es lineal y se muestra como alerta temprana, no como presupuesto contable.
+- Las metas de lifecycle se calibran con el desempeño reciente de julio a septiembre de 2026 y pueden refinarse cuando Shadow defina presupuesto y capacidad comercial.

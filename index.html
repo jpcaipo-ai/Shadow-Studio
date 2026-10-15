@@ -2,209 +2,85 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Dashboard de Growth de Shadow Studio">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Tablero de Growth, lifecycle, adquisición y consumo de Shadow Studio.">
   <title>Shadow Studio · Growth Command Center</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236c2aa0'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' font-family='Arial' font-weight='700' fill='white'%3ES%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <div>
-      <p class="eyebrow">Shadow Studio</p>
-      <h1>Growth Command Center</h1>
-      <p class="subtitle">Adquisición, monetización, recurrencia, reactivación y renovación en una sola vista.</p>
-    </div>
-    <div class="header-actions">
-      <button id="exportButton" class="button secondary" type="button">Exportar vista CSV</button>
-      <button id="exportTransactionsButton" class="button secondary" type="button">Exportar transacciones</button>
-      <button id="resetButton" class="button" type="button">Restablecer filtros</button>
-    </div>
+    <div class="brand-lockup"><span class="brand-mark">S</span><div><p class="eyebrow">Shadow Studio</p><h1>Growth Command Center</h1></div></div>
+    <div class="header-actions"><span id="dataCutoff" class="data-pill">Cargando datos…</span><button id="exportSummary" class="button ghost" type="button">Exportar resumen</button><button id="exportTransactions" class="button" type="button">Exportar transacciones</button></div>
   </header>
-
   <main>
-    <section class="filter-panel" aria-labelledby="filterTitle">
-      <div class="section-heading compact">
-        <div>
-          <p class="eyebrow">Control de análisis</p>
-          <h2 id="filterTitle">Filtros vinculados</h2>
-        </div>
-        <p id="coverageLabel" class="context"></p>
-      </div>
+    <section class="filter-shell" aria-labelledby="filterHeading">
+      <div class="filter-intro"><div><p class="eyebrow">Control de lectura</p><h2 id="filterHeading">Filtros vinculados</h2></div><button id="resetFilters" class="text-button" type="button">Restablecer</button></div>
       <div class="filters">
-        <label>Periodo o mes<select id="periodFilter"></select></label>
+        <label>Periodo<select id="periodFilter"></select></label>
+        <label class="custom-date">Desde<input id="startDate" type="date"></label>
+        <label class="custom-date">Hasta<input id="endDate" type="date"></label>
+        <label>Lifecycle<select id="lifecycleFilter"></select></label>
+        <label>Disciplina<select id="disciplineFilter"></select></label>
+        <label>Profesor<select id="instructorFilter"></select></label>
         <label>Familia de plan<select id="familyFilter"></select></label>
-        <label>Método de pago<select id="methodFilter"></select></label>
-        <label>Tipo de cliente<select id="typeFilter"></select></label>
+        <label>Oferta de entrada<select id="entryFilter"></select></label>
       </div>
-      <div id="customDateRange" class="custom-date-range" hidden>
-        <label>Fecha inicial<input id="startDateFilter" type="date"></label>
-        <label>Fecha final<input id="endDateFilter" type="date"></label>
-        <p id="dateValidation" class="date-validation" role="status"></p>
+      <p id="filterScope" class="scope-note"></p>
+    </section>
+    <nav class="view-tabs" aria-label="Secciones del tablero">
+      <button class="tab-button active" data-view="overview" type="button">Diagnóstico</button>
+      <button class="tab-button" data-view="lifecycle" type="button">Lifecycle</button>
+      <button class="tab-button" data-view="acquisition" type="button">Adquisición</button>
+      <button class="tab-button" data-view="product" type="button">Producto y disciplinas</button>
+      <button class="tab-button" data-view="instructors" type="button">Profesores</button>
+    </nav>
+
+    <section class="view active" data-view-panel="overview">
+      <article class="emergency-card"><div><p class="eyebrow danger">Alerta de facturación</p><h2 id="projectionHeadline">Calculando proyección…</h2><p id="projectionNarrative" class="lead"></p></div><div class="pace-block"><div class="pace-label"><span>Avance contra meta mensual</span><strong id="goalProgressLabel">—</strong></div><div class="progress-track"><span id="goalProgress"></span></div><div class="pace-foot"><span id="dailyPace"></span><span id="targetGap"></span></div></div></article>
+      <div class="kpi-grid" aria-live="polite">
+        <article><span>Facturación</span><strong id="revenueKpi">—</strong><small id="revenueDelta">—</small></article>
+        <article><span>Facturación recurrente</span><strong id="repeatRevenueKpi">—</strong><small id="repeatRevenueDelta">—</small></article>
+        <article><span>Nuevos clientes</span><strong id="newCustomersKpi">—</strong><small id="newCustomersDelta">—</small></article>
+        <article><span>Ticket promedio</span><strong id="ticketKpi">—</strong><small id="ticketDelta">—</small></article>
+        <article><span>Asistencias</span><strong id="attendanceKpi">—</strong><small id="attendanceDelta">—</small></article>
+        <article><span>Activos al corte</span><strong id="activeKpi">—</strong><small id="inactiveKpi">—</small></article>
       </div>
+      <div class="section-title"><div><p class="eyebrow">Comparación justa</p><h2 id="comparisonTitle">Octubre contra octubre</h2></div><p>El periodo anterior usa exactamente los mismos días del mes.</p></div>
+      <div class="grid two-one"><article class="panel"><div class="panel-heading"><div><h3>Facturación acumulada</h3><p id="cumulativeContext"></p></div><span class="legend"><i class="current"></i>Actual <i class="prior"></i>Año anterior</span></div><div id="cumulativeRevenueChart" class="chart tall"></div></article><article class="panel target-panel"><div class="panel-heading"><div><h3>Meta por lifecycle</h3><p>Objetivos calibrados con julio–septiembre.</p></div></div><div id="lifecycleTargets" class="target-list"></div></article></div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Facturación mensual por lifecycle</h3><p>La caída se explica por el mix, no solo por el total.</p></div></div><div id="lifecycleRevenueChart" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>Asistencia vs. facturación</h3><p>Índice mensual. Base 100 en el primer mes visible.</p></div></div><div id="revenueAttendanceChart" class="chart tall"></div></article></div>
+      <div class="section-title"><div><p class="eyebrow">Acción inmediata</p><h2>Carteras para recuperar caja</h2></div><p>Los valores usan el historial individual de compras.</p></div><div id="actionCards" class="action-grid"></div>
     </section>
 
-    <section class="kpi-grid" aria-label="Indicadores principales" aria-live="polite">
-      <article class="kpi accent-blue"><span>Ingreso</span><strong id="revenueKpi">—</strong><small id="revenueContext">Periodo seleccionado</small></article>
-      <article class="kpi accent-green"><span>Pagadores únicos</span><strong id="payersKpi">—</strong><small>Clientes identificados</small></article>
-      <article class="kpi accent-gold"><span>Ingreso nuevo</span><strong id="newRevenueKpi">—</strong><small id="newShareKpi">—</small></article>
-      <article class="kpi accent-neutral"><span>Ticket promedio</span><strong id="ticketKpi">—</strong><small id="transactionsKpi">—</small></article>
-      <article class="kpi accent-purple"><span>Pagadores repetidos</span><strong id="repeatKpi">—</strong><small id="top10Kpi">—</small></article>
+    <section class="view" data-view-panel="lifecycle">
+      <div class="section-title"><div><p class="eyebrow">Cartera</p><h2>Activos, vencimientos y churn</h2></div><p>Renovación continua: hasta 30 días después del vencimiento.</p></div>
+      <div class="kpi-grid compact"><article><span>Por vencer 30 días</span><strong id="dueKpi">—</strong><small id="dueValueKpi">—</small></article><article><span>Vencidos últimos 30 días</span><strong id="overdueKpi">—</strong><small id="overdueValueKpi">—</small></article><article><span>Renovación histórica 30d</span><strong id="renewal30Kpi">—</strong><small>cohortes maduras</small></article><article><span>Churn histórico 30d</span><strong id="churn30Kpi">—</strong><small>sin recompra en 30 días</small></article><article><span>LTV mediano observado</span><strong id="ltvKpi">—</strong><small id="repeatKpi">—</small></article><article><span>Frecuencia de recompra</span><strong id="frequencyKpi">—</strong><small>mediana entre compras</small></article></div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Activos e inactivos por mes</h3><p>Foto al cierre; el mes actual usa el corte disponible.</p></div></div><div id="activeInactiveChart" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>Renovación por vencimiento</h3><p>Solo cohortes con 30 días completos.</p></div></div><div id="renewalChart" class="chart tall"></div></article></div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Renovación por consumo</h3><p>Más uso se asocia con mayor retención.</p></div></div><div id="attendanceRetentionChart" class="chart"></div></article><article class="panel"><div class="panel-heading"><div><h3>Renovación por variedad</h3><p>Disciplinas consumidas en la primera membresía.</p></div></div><div id="disciplineRetentionChart" class="chart"></div></article></div>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Lifecycle mensual</h3><p>Compras y facturación por ciclo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Nuevo</th><th>Renovación</th><th>Reactivación</th><th>Resurrección</th><th>Facturación</th></tr></thead><tbody id="lifecycleTable"></tbody></table></div></article>
     </section>
 
-    <section class="selection-read" aria-live="polite">
-      <div>
-        <p class="eyebrow">Lectura de la selección</p>
-        <h2 id="selectionHeadline">—</h2>
-      </div>
-      <p id="selectionDetail">—</p>
+    <section class="view" data-view-panel="acquisition">
+      <div class="section-title"><div><p class="eyebrow">Embudo</p><h2>Free Pass, 2×1 y una clase</h2></div><p>Friends & Family no cuenta como conversión comercial.</p></div><div id="offerCards" class="offer-grid"></div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Embudo de adquisición</h3><p>Volumen, show y compra en 30 días.</p></div></div><div id="acquisitionFunnel" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>2×1 y combinación de disciplinas</h3><p>Conversión solo para cohortes maduras.</p></div></div><div id="twoPatternChart" class="chart tall"></div></article></div>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Cohortes mensuales</h3><p>Los meses recientes pueden seguir en maduración.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Oferta</th><th>Clientes</th><th>Show</th><th>Maduros</th><th>Compraron ≤30d</th><th>Conversión</th><th>Ticket</th></tr></thead><tbody id="acquisitionTable"></tbody></table></div></article>
     </section>
 
-    <section class="chart-grid">
-      <article class="chart-panel wide">
-        <div class="chart-title"><div><p class="eyebrow">Tendencia</p><h2>Ingreso mensual</h2></div><span id="trendTotal" class="chart-stat"></span></div>
-        <div id="revenueChart" class="chart" role="img" aria-label="Gráfico de ingreso mensual"></div>
-      </article>
-      <article class="chart-panel wide">
-        <div class="chart-title"><div><p class="eyebrow">Composición</p><h2>Ingreso nuevo y recurrente</h2></div><div class="legend"><span><i class="dot new"></i>Nuevo</span><span><i class="dot recurring"></i>Recurrente</span></div></div>
-        <div id="customerMixChart" class="chart" role="img" aria-label="Gráfico de ingreso nuevo y recurrente"></div>
-      </article>
-      <article class="chart-panel">
-        <div class="chart-title"><div><p class="eyebrow">Oferta</p><h2>Ingreso por familia</h2></div></div>
-        <div id="familyChart" class="chart bars" role="img" aria-label="Gráfico de ingreso por familia de plan"></div>
-      </article>
-      <article class="chart-panel">
-        <div class="chart-title"><div><p class="eyebrow">Cobranza</p><h2>Ingreso por método de pago</h2></div></div>
-        <div id="methodChart" class="chart bars" role="img" aria-label="Gráfico de ingreso por método de pago"></div>
-      </article>
+    <section class="view" data-view-panel="product">
+      <div class="section-title"><div><p class="eyebrow">Producto</p><h2>Disciplinas y consumo de planes</h2></div><p>Demanda observada; no equivale a ocupación sin aforo y horarios ofrecidos.</p></div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Disciplinas consumidas</h3><p>Asistencias y clientes únicos.</p></div></div><div id="disciplineDemandChart" class="chart x-tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>Mix de familias de plan</h3><p>Facturación del periodo.</p></div></div><div id="familyMixChart" class="chart x-tall"></div></article></div>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Consumo por plan</h3><p>Membresías con inicio hasta el corte seleccionado.</p></div></div><div class="table-wrap"><table><thead><tr><th>Plan</th><th>Compras</th><th>Clientes</th><th>Facturación</th><th>Ticket</th><th>Asistencias promedio</th><th>% cero asistencia</th></tr></thead><tbody id="planTable"></tbody></table></div></article>
     </section>
 
-    <section class="panel funnel-panel">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Embudo de adquisición</p>
-          <h2>Clase de prueba → asistencia → paquete</h2>
-          <p class="context">Conversión: compra de un paquete pagado dentro de 30 días. Las cohortes recientes se muestran como provisionales.</p>
-        </div>
-      </div>
-      <div class="funnel-kpis" aria-live="polite">
-        <div><span>Pruebas</span><strong id="trialCustomersKpi">—</strong><small>clientes de la cohorte</small></div>
-        <div><span>Asistieron</span><strong id="trialAttendanceKpi">—</strong><small id="trialAttendanceRateKpi">—</small></div>
-        <div><span>Compraron</span><strong id="trialConvertedKpi">—</strong><small>dentro de 30 días</small></div>
-        <div><span>Conversión</span><strong id="trialConversionKpi">—</strong><small>solo cohortes maduras</small></div>
-        <div><span>Ticket promedio</span><strong id="trialTicketKpi">—</strong><small>primera compra ≤30 días</small></div>
-        <div><span>Paquete principal</span><strong id="trialTopPackageKpi" class="text-kpi">—</strong><small id="trialTopPackageShareKpi">—</small></div>
-        <div><span>Tiempo a compra</span><strong id="trialDaysKpi">—</strong><small>mediana en días</small></div>
-      </div>
-      <div class="funnel-layout">
-        <div id="funnelMonthlyChart" class="chart funnel-chart" role="img" aria-label="Embudo mensual de clases de prueba"></div>
-        <div>
-          <p class="mini-title">Conversión según asistencia</p>
-          <div id="conversionByAttendance" class="conversion-grid"></div>
-        </div>
-      </div>
-      <div class="monthly-table-heading"><div><p class="mini-title">Indicadores mensuales · últimos 12 meses</p><p class="context">Conversión y ticket usan únicamente cohortes con 30 días completos.</p></div></div>
-      <div class="table-scroll">
-        <table class="monthly-table">
-          <thead><tr><th>Mes</th><th>Pruebas</th><th>Show rate</th><th>0 asistencias</th><th>1 asistencia</th><th>2+ asistencias</th><th>Compras post-prueba</th><th>Conversión total</th><th>Ticket promedio</th><th>Paquete principal</th></tr></thead>
-          <tbody id="trialMonthlyTable"></tbody>
-        </table>
-      </div>
+    <section class="view" data-view-panel="instructors">
+      <div class="section-title"><div><p class="eyebrow">Experiencia</p><h2>Profesores que convierten y retienen</h2></div><p>Primera clase para conversión; profesor dominante para renovación.</p></div>
+      <div class="grid two"><article class="panel table-panel"><div class="panel-heading"><div><h3>Conversión de nuevos</h3><p>Mínimo cinco pruebas atendidas y maduras.</p></div></div><div class="table-wrap"><table><thead><tr><th>Profesor</th><th>Pruebas</th><th>Compraron</th><th>Conversión</th></tr></thead><tbody id="instructorConversionTable"></tbody></table></div></article><article class="panel table-panel"><div class="panel-heading"><div><h3>Renovación de membresías</h3><p>Mínimo diez ciclos maduros.</p></div></div><div class="table-wrap"><table><thead><tr><th>Profesor dominante</th><th>Ciclos</th><th>Renovaron</th><th>Renovación</th></tr></thead><tbody id="instructorRenewalTable"></tbody></table></div></article></div>
+      <article class="insight-card"><p class="eyebrow">Cómo leerlo</p><h3>Captar y retener son habilidades distintas</h3><p>Usa conversión para revisar bienvenida, exploración y cierre. Usa renovación para revisar experiencia, hábito y vínculo. No conviertas el ranking en evaluación causal sin controlar disciplina, horario, sede y promoción.</p></article>
     </section>
 
-    <section class="panel lifecycle-panel">
-      <div class="section-heading lifecycle-heading">
-        <div>
-          <p class="eyebrow">Customer lifecycle</p>
-          <h2>Nuevos, renovación, reactivación y resurrección</h2>
-          <p class="context lifecycle-definition">Renovación: siguiente compra hasta 90 días después del vencimiento. Reactivación: 91–365 días. Resurrección: más de un año.</p>
-        </div>
-        <div class="legend lifecycle-legend">
-          <span><i class="dot new"></i>Nuevo</span>
-          <span><i class="dot recurring"></i>Renovación</span>
-          <span><i class="dot reactivated"></i>Reactivación</span>
-          <span><i class="dot resurrected"></i>Resurrección</span>
-        </div>
-      </div>
-      <div class="lifecycle-kpis" aria-live="polite">
-        <div class="lifecycle-total"><span>Facturación lifecycle</span><strong id="lifecycleRevenueKpi">—</strong><small>paquetes pagados del periodo</small></div>
-        <div class="lifecycle-total"><span>Compras lifecycle</span><strong id="lifecyclePurchasesKpi">—</strong><small>transacciones clasificadas</small></div>
-        <div><span>Nuevos</span><strong id="newLifecycleKpi">—</strong><small id="newLifecycleRevenueKpi">—</small></div>
-        <div><span>Renovaciones</span><strong id="continuousLifecycleKpi">—</strong><small id="continuousLifecycleRevenueKpi">—</small></div>
-        <div><span>Reactivaciones</span><strong id="reactivatedLifecycleKpi">—</strong><small id="reactivatedLifecycleRevenueKpi">—</small></div>
-        <div><span>Resurrecciones</span><strong id="resurrectedLifecycleKpi">—</strong><small id="resurrectedLifecycleRevenueKpi">—</small></div>
-      </div>
-      <div id="lifecycleMonthlyChart" class="chart lifecycle-monthly-chart" role="img" aria-label="Gráfico mensual de clientes nuevos, continuos y reactivados"></div>
-    </section>
-
-    <section class="insight-grid">
-      <article class="panel opportunities">
-        <div class="section-heading"><div><p class="eyebrow">Diagnóstico</p><h2>Cuellos de botella y oportunidades</h2></div></div>
-        <div id="opportunityList"></div>
-      </article>
-      <article class="panel renewal">
-        <div class="section-heading"><div><p class="eyebrow">Renovación</p><h2>Vencimientos y probabilidad</h2></div><span class="status">Ventana 90 días</span></div>
-        <dl class="metric-list">
-          <div><dt>Clientes por vencer, próximos 30 días</dt><dd id="dueValue">—</dd></div>
-          <div><dt>Probabilidad de renovar en 30 días</dt><dd id="retainedValue">—</dd></div>
-          <div><dt>Probabilidad de renovar en 90 días</dt><dd id="fugueValue">—</dd></div>
-          <div><dt>Ticket promedio proyectado</dt><dd id="renewalTicketValue">—</dd></div>
-          <div><dt>Ticket mediano proyectado</dt><dd id="renewalMedianValue">—</dd></div>
-          <div><dt>Renovaciones esperadas</dt><dd id="churnValue">—</dd></div>
-          <div><dt>Cartera potencial si todos renuevan</dt><dd id="renewalPipelineValue">—</dd></div>
-          <div><dt>Facturación esperada ajustada</dt><dd id="renewalExpectedValue">—</dd></div>
-          <div><dt>Retornos capturados a 90 días</dt><dd id="renewalValue">—</dd></div>
-        </dl>
-        <p id="renewalNote" class="notice"></p>
-      </article>
-    </section>
-
-    <section class="operations-grid">
-      <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">Clases de prueba</p><h2>Free Pass y 2×1 por mes</h2><p class="context">Volumen según fecha de venta. Incluye pruebas gratuitas y la promoción pagada 2×1.</p></div></div>
-        <div class="total-widget"><span>Total histórico de clases de prueba</span><strong id="trialVolumeTotalKpi">—</strong><div class="trial-volume-split"><small>Free Pass: <b id="freePassTotalKpi">—</b></small><small>2×1: <b id="twoTotalKpi">—</b></small></div></div>
-        <div class="legend trial-legend"><span><i class="dot new"></i>Free Pass</span><span><i class="dot trial-two"></i>2×1</span></div>
-        <div id="trialVolumeMonthlyChart" class="chart compact-chart" role="img" aria-label="Free Pass y clases de prueba 2 por 1 vendidas por mes"></div>
-        <p class="mini-title">Seguimiento de la prueba 2×1</p>
-        <dl class="metric-list">
-          <div><dt>Ventas 2×1 en el periodo filtrado</dt><dd id="twoPurchasesKpi">—</dd></div>
-          <div><dt>Usaron las dos clases</dt><dd id="twoBothKpi">—</dd></div>
-          <div><dt>Usaron una clase</dt><dd id="twoOneKpi">—</dd></div>
-          <div><dt>No asistieron</dt><dd id="twoZeroKpi">—</dd></div>
-          <div><dt>Compraron otro paquete ≤60 días</dt><dd id="twoFollowKpi">—</dd></div>
-        </dl>
-        <p id="twoForOneNote" class="notice"></p>
-      </article>
-      <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">Capacidad</p><h2>Asistencias y carga de clases</h2></div></div>
-        <dl class="metric-list">
-          <div><dt>Asistencias</dt><dd id="attendanceTotalKpi">—</dd></div>
-          <div><dt>Clientes-mes</dt><dd id="attendanceClientsKpi">—</dd></div>
-          <div><dt>Sesiones dictadas</dt><dd id="attendanceSessionsKpi">—</dd></div>
-          <div><dt>Promedio por sesión</dt><dd id="attendanceAvgKpi">—</dd></div>
-          <div><dt>Percentil 90 por sesión</dt><dd id="attendanceP90Kpi">—</dd></div>
-        </dl>
-        <p class="notice">El export no contiene aforo configurado ni fecha de creación de la reserva. Por eso se muestra carga observada, no porcentaje de ocupación ni anticipación de agenda.</p>
-      </article>
-    </section>
-
-    <section class="lower-grid">
-      <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">Base de clientes</p><h2>Ciclo de vida observado</h2></div></div>
-        <div id="lifecycleChart" class="lifecycle"></div>
-      </article>
-      <article class="panel">
-        <div class="section-heading"><div><p class="eyebrow">Confiabilidad</p><h2>Calidad de datos</h2></div></div>
-        <div id="qualityGrid" class="quality-grid"></div>
-      </article>
-    </section>
+    <section class="methodology"><details><summary>Metodología, privacidad y límites</summary><div class="method-grid"><p><strong>Privacidad.</strong> La web contiene códigos anónimos; no publica datos personales.</p><p><strong>Lifecycle.</strong> Nuevo: primera compra. Renovación: ≤30 días. Reactivación: 31–365 días. Resurrección: más de un año.</p><p><strong>Capacidad.</strong> Sin aforo, reservas rechazadas y sesiones ofrecidas no puede calcularse ocupación.</p><p><strong>Calidad.</strong> Hay 45 membresías sin fecha de fin; no entran en vencimiento ni churn.</p></div></details></section>
   </main>
-
-  <footer>
-    <p>Fuente: exports de clientes, ventas, pruebas y asistencias de Shadow Studio. Octubre 2026 contiene datos hasta el día 11.</p>
-    <p id="updatedLabel"></p>
-  </footer>
-
-  <script src="data.js?v=20261011-5"></script>
-  <script src="app.js?v=20261011-5"></script>
+  <footer><p>Shadow Studio · Growth Command Center · Datos actualizados al 15/10/2026</p></footer>
+  <script src="data.js"></script><script src="app.js"></script>
 </body>
 </html>
