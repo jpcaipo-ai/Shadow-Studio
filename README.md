@@ -42,6 +42,8 @@ La probabilidad de renovación se calcula sobre vencimientos históricos maduros
 
 La valorización de renovaciones usa, cliente por cliente, el importe de su último paquete pagado. Cada cliente próximo a vencer se cuenta una sola vez. El tablero muestra la cartera potencial y la facturación esperada ajustada por la probabilidad histórica de renovación a 30 días.
 
+La tabla de profundidad de renovación usa una **fecha efectiva de vencimiento**: la primera entre la fecha final contractual y el día en que el cliente agotó sus clases. El agotamiento se calcula únicamente cuando el cupo puede inferirse de forma confiable del nombre del plan; los planes ilimitados o sin cupo identificable conservan la fecha final. El corte actual permite identificar el cupo en 63.3% de los ciclos comerciales.
+
 ## Customer lifecycle
 
 El lifecycle se calcula por cliente-mes y responde a los filtros del tablero:
@@ -50,6 +52,12 @@ El lifecycle se calcula por cliente-mes y responde a los filtros del tablero:
 - **Renovación continua:** compra hasta 30 días después del vencimiento de la membresía anterior.
 - **Reactivación:** compra entre 31 días y un año después del vencimiento.
 - **Resurrección:** compra más de un año después del vencimiento.
+
+La profundidad separa la renovación que le tocaba al cliente:
+
+- **Primera renovación:** venció su primera membresía.
+- **Segunda renovación:** ya había renovado una vez.
+- **Tercera o más:** ya había renovado al menos dos veces.
 
 El tablero conserva además la tasa a 90 días como referencia diagnóstica, pero la clasificación operativa usa el umbral de 30 días solicitado.
 
