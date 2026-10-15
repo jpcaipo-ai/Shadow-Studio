@@ -13,12 +13,16 @@
   const $ = id => document.getElementById(id);
 
   const purchaseIndex = new Map();
+  const nextPurchaseValue = new Map();
   const purchasesByCustomer = new Map();
   data.transactions.forEach(row => {
     if (!purchasesByCustomer.has(row[TX.customer])) purchasesByCustomer.set(row[TX.customer], []);
     purchasesByCustomer.get(row[TX.customer]).push(row);
   });
-  purchasesByCustomer.forEach(rows => rows.sort((a, b) => a[TX.date].localeCompare(b[TX.date])).forEach((row, index) => purchaseIndex.set(row, index)));
+  purchasesByCustomer.forEach(rows => rows.sort((a, b) => a[TX.date].localeCompare(b[TX.date])).forEach((row, index) => {
+    purchaseIndex.set(row, index);
+    nextPurchaseValue.set(row, rows[index + 1]?.[TX.value] || 0);
+  }));
 
   const addYears = (value, years) => {
     const date = new Date(`${value}T00:00:00Z`);
@@ -128,6 +132,7 @@
         renewed: selected.filter(row => row[TX.effectiveRenew30]).length,
         gross,
         expected: gross * historicRates[band],
+        actual: selected.filter(row => row[TX.effectiveRenew30]).reduce((total, row) => total + nextPurchaseValue.get(row), 0),
       };
     };
     function sumValues(rows, index) { return rows.reduce((total, row) => total + Number(row[index] || 0), 0); }
@@ -141,11 +146,13 @@
     const currentStats = [0, 1, 2].map(band => stats(currentRows, band));
     const currentGross = currentStats.reduce((total, value) => total + value.gross, 0);
     const currentExpected = currentStats.reduce((total, value) => total + value.expected, 0);
+    const currentActual = currentStats.reduce((total, value) => total + value.actual, 0);
     const currentRenewed = currentStats.reduce((total, value) => total + value.renewed, 0);
     const forecast = [
       ["Clientes por renovar", integer.format(currentRows.length), monthLabel(currentMonth)],
       ["Valor bruto", currency.format(currentGross), "Última membresía comprada"],
       ["Valor esperado", currency.format(currentExpected), "Probabilidad por profundidad"],
+      ["Valor real capturado", currency.format(currentActual), "Compras efectivamente realizadas"],
       ["Ya renovaron al corte", integer.format(currentRenewed), `${percent.format(currentRows.length ? currentRenewed / currentRows.length : 0)} de la cartera`],
     ];
     $("renewalForecastCards").replaceChildren(...forecast.map(([label, value, note]) => {
@@ -165,7 +172,7 @@
       const rate = document.createElement("strong");
       rate.textContent = value.due ? percent.format(value.renewed / value.due) : "Sin casos";
       const detail = document.createElement("p");
-      detail.textContent = `${integer.format(value.renewed)} de ${integer.format(value.due)} · bruto ${currency.format(value.gross)} · esperado ${currency.format(value.expected)}`;
+      detail.textContent = `${integer.format(value.renewed)} de ${integer.format(value.due)} · bruto ${currency.format(value.gross)} · esperado ${currency.format(value.expected)} · real ${currency.format(value.actual)}`;
       card.append(title, rate, detail);
       return card;
     }));
@@ -185,6 +192,7 @@
         cell(row, value.due ? percent.format(value.renewed / value.due) : "—");
         cell(row, currency.format(value.gross));
         cell(row, currency.format(value.expected));
+        cell(row, currency.format(value.actual));
       });
       return row;
     });

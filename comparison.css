@@ -34,7 +34,7 @@
 
 .renewal-forecast-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -65,9 +65,9 @@
 .renewal-depth-card p { margin: 0; color: var(--muted); font-size: 11px; }
 .renewal-depth-table thead tr:first-child th { text-align: center; border-bottom: 1px solid #ded4e6; }
 .renewal-depth-table thead tr:first-child th:first-child { text-align: left; }
-.renewal-depth-table tbody td:nth-child(4),
-.renewal-depth-table tbody td:nth-child(7),
-.renewal-depth-table tbody td:nth-child(10) { font-weight: 800; color: var(--purple); }
+.renewal-depth-table tbody td:nth-child(5),
+.renewal-depth-table tbody td:nth-child(11),
+.renewal-depth-table tbody td:nth-child(17) { font-weight: 800; color: var(--purple); }
 
 @media (max-width: 1100px) {
   .lifecycle-compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

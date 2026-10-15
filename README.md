@@ -59,7 +59,7 @@ La profundidad separa la renovación que le tocaba al cliente:
 - **Segunda renovación:** ya había renovado una vez.
 - **Tercera o más:** ya había renovado al menos dos veces.
 
-El valor bruto de renovación suma el importe de la última membresía de cada cliente próximo a renovar. El valor esperado multiplica ese importe por la tasa histórica madura de su profundidad de renovación. Si un cliente tiene más de un ciclo que vence en el mismo mes, se conserva solamente su última membresía para evitar duplicarlo.
+El valor bruto de renovación suma el importe de la última membresía de cada cliente próximo a renovar. El valor esperado multiplica ese importe por la tasa histórica madura de su profundidad de renovación. El valor real suma el importe de la siguiente membresía efectivamente comprada dentro de 30 días del vencimiento efectivo. Si un cliente tiene más de un ciclo que vence en el mismo mes, se conserva solamente su última membresía para evitar duplicarlo.
 
 El tablero conserva además la tasa a 90 días como referencia diagnóstica, pero la clasificación operativa usa el umbral de 30 días solicitado.
 
