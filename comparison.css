@@ -1,0 +1,34 @@
+.lifecycle-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lifecycle-compare-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--purple);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(43, 25, 62, .05);
+}
+
+.lifecycle-compare-card:nth-child(2) { border-top-color: var(--mint); }
+.lifecycle-compare-card:nth-child(3) { border-top-color: var(--gold); }
+.lifecycle-compare-card:nth-child(4) { border-top-color: var(--coral); }
+.lifecycle-compare-card > span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
+.lifecycle-compare-card strong { display: block; margin: 8px 0 4px; font-size: 25px; letter-spacing: -.035em; }
+.lifecycle-compare-card p { margin: 0 0 10px; color: var(--muted); font-size: 11px; }
+.lifecycle-compare-card b { display: inline-block; border-radius: 999px; padding: 5px 8px; background: var(--lav); font-size: 12px; }
+.lifecycle-comparison-panel { margin-bottom: 14px; }
+.delta-amount { font-weight: 800; }
+.total-row { background: #f7f2fa; font-weight: 800; }
+
+@media (max-width: 1100px) {
+  .lifecycle-compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 520px) {
+  .lifecycle-compare-grid { grid-template-columns: 1fr; }
+}

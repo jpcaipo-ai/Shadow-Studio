@@ -7,6 +7,7 @@
   <title>Shadow Studio · Growth Command Center</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236c2aa0'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' font-family='Arial' font-weight='700' fill='white'%3ES%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="comparison.css">
 </head>
 <body>
   <header class="topbar">
@@ -55,6 +56,9 @@
     <section class="view" data-view-panel="lifecycle">
       <div class="section-title"><div><p class="eyebrow">Cartera</p><h2>Activos, vencimientos y churn</h2></div><p>Renovación continua: hasta 30 días después del vencimiento.</p></div>
       <div class="kpi-grid compact"><article><span>Por vencer 30 días</span><strong id="dueKpi">—</strong><small id="dueValueKpi">—</small></article><article><span>Vencidos últimos 30 días</span><strong id="overdueKpi">—</strong><small id="overdueValueKpi">—</small></article><article><span>Renovación histórica 30d</span><strong id="renewal30Kpi">—</strong><small>cohortes maduras</small></article><article><span>Churn histórico 30d</span><strong id="churn30Kpi">—</strong><small>sin recompra en 30 días</small></article><article><span>LTV mediano observado</span><strong id="ltvKpi">—</strong><small id="repeatKpi">—</small></article><article><span>Frecuencia de recompra</span><strong id="frequencyKpi">—</strong><small>mediana entre compras</small></article></div>
+      <div class="section-title"><div><p class="eyebrow">Comparación interanual</p><h2 id="lifecycleComparisonTitle">Lifecycle contra el año anterior</h2></div><p id="lifecycleComparisonContext">Mismo periodo y mismos filtros.</p></div>
+      <div id="lifecycleComparisonCards" class="lifecycle-compare-grid"></div>
+      <article class="panel table-panel lifecycle-comparison-panel"><div class="panel-heading"><div><h3>Monto y compras por lifecycle</h3><p>La variación compara exactamente las mismas fechas del año anterior.</p></div></div><div class="table-wrap"><table><thead><tr><th>Lifecycle</th><th>Compras actual</th><th>Compras año anterior</th><th>Var. compras</th><th>Facturación actual</th><th>Facturación año anterior</th><th>Var. monto</th><th>Var. %</th></tr></thead><tbody id="lifecycleComparisonTable"></tbody></table></div></article>
       <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Activos e inactivos por mes</h3><p>Foto al cierre; el mes actual usa el corte disponible.</p></div></div><div id="activeInactiveChart" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>Renovación por vencimiento</h3><p>Solo cohortes con 30 días completos.</p></div></div><div id="renewalChart" class="chart tall"></div></article></div>
       <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Renovación por consumo</h3><p>Más uso se asocia con mayor retención.</p></div></div><div id="attendanceRetentionChart" class="chart"></div></article><article class="panel"><div class="panel-heading"><div><h3>Renovación por variedad</h3><p>Disciplinas consumidas en la primera membresía.</p></div></div><div id="disciplineRetentionChart" class="chart"></div></article></div>
       <article class="panel table-panel"><div class="panel-heading"><div><h3>Lifecycle mensual</h3><p>Compras y facturación por ciclo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Nuevo</th><th>Renovación</th><th>Reactivación</th><th>Resurrección</th><th>Facturación</th></tr></thead><tbody id="lifecycleTable"></tbody></table></div></article>
@@ -81,6 +85,6 @@
     <section class="methodology"><details><summary>Metodología, privacidad y límites</summary><div class="method-grid"><p><strong>Privacidad.</strong> La web contiene códigos anónimos; no publica datos personales.</p><p><strong>Lifecycle.</strong> Nuevo: primera compra. Renovación: ≤30 días. Reactivación: 31–365 días. Resurrección: más de un año.</p><p><strong>Capacidad.</strong> Sin aforo, reservas rechazadas y sesiones ofrecidas no puede calcularse ocupación.</p><p><strong>Calidad.</strong> Hay 45 membresías sin fecha de fin; no entran en vencimiento ni churn.</p></div></details></section>
   </main>
   <footer><p>Shadow Studio · Growth Command Center · Datos actualizados al 15/10/2026</p></footer>
-  <script src="data.js"></script><script src="app.js"></script>
+  <script src="data.js"></script><script src="app.js"></script><script src="comparison.js"></script>
 </body>
 </html>

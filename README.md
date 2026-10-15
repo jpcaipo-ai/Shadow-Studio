@@ -56,5 +56,6 @@ El tablero conserva además la tasa a 90 días como referencia diagnóstica, per
 ## Comparaciones y metas
 
 - Octubre 2026 se compara contra **los mismos días** de octubre 2025 para evitar sesgo por mes incompleto.
+- La vista de Lifecycle compara cada ciclo contra el mismo periodo del año anterior: compras, facturación, variación monetaria y variación porcentual.
 - El forecast mensual es lineal y se muestra como alerta temprana, no como presupuesto contable.
 - Las metas de lifecycle se calibran con el desempeño reciente de julio a septiembre de 2026 y pueden refinarse cuando Shadow defina presupuesto y capacidad comercial.
