@@ -43,6 +43,7 @@
   fillSelect(controls.entry,["Todos",...data.dimensions.entryTypes]);
   controls.start.value=state.start; controls.end.value=state.end;
   setText("dataCutoff",`Corte ${data.generatedAt.split("-").reverse().join("/")} · ${integer.format(data.transactions.length)} compras`);
+  setText("footerCutoff",`Shadow Studio · Growth Command Center · Ventas al ${data.sourceCutoffs.sales.split("-").reverse().join("/")} · Asistencias al ${data.sourceCutoffs.attendance.split("-").reverse().join("/")}`);
 
   function applyPeriod() {
     const p=state.period;

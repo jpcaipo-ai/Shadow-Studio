@@ -23,7 +23,7 @@ Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server
 
 ## Actualización de datos
 
-El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente llega al **15 de octubre de 2026**.
+El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente incluye **ventas al 16 de octubre de 2026** y **asistencias/adquisición al 15 de octubre de 2026**. El export más reciente reemplaza únicamente el tramo de octubre que se superpone con la base histórica, evitando duplicar transacciones.
 
 ## Estructura
 
