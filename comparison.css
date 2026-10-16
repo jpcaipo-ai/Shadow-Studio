@@ -52,6 +52,18 @@
 .renewal-status { display: inline-block; border-radius: 999px; padding: 4px 7px; background: var(--lav); color: var(--purple); font-size: 10px; font-weight: 800; }
 .renewal-status.provisional { background: #fff1d8; color: #8a5b05; }
 
+.return-timing-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.return-timing-card { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.return-timing-card span { display: block; color: var(--muted); font-size: 11px; font-weight: 800; }
+.return-timing-card strong { display: block; margin: 7px 0 3px; font-size: 25px; letter-spacing: -.04em; }
+.return-timing-card p { margin: 0; color: var(--muted); font-size: 11px; }
+
 .renewal-depth-card {
   background: linear-gradient(145deg, #fff, #faf7fc);
   border: 1px solid var(--line);
@@ -73,9 +85,11 @@
   .lifecycle-compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .renewal-depth-grid { grid-template-columns: 1fr; }
   .renewal-forecast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .return-timing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
   .lifecycle-compare-grid { grid-template-columns: 1fr; }
   .renewal-forecast-grid { grid-template-columns: 1fr; }
+  .return-timing-grid { grid-template-columns: 1fr; }
 }

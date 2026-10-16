@@ -61,6 +61,8 @@ La profundidad separa la renovación que le tocaba al cliente:
 
 El valor bruto de renovación suma el importe de la última membresía de cada cliente próximo a renovar. El valor esperado multiplica ese importe por la tasa histórica madura de su profundidad de renovación. El valor real suma el importe de la siguiente membresía efectivamente comprada dentro de 30 días del vencimiento efectivo. Si un cliente tiene más de un ciclo que vence en el mismo mes, se conserva solamente su última membresía para evitar duplicarlo.
 
+La tabla de tiempo de retorno sigue la siguiente compra comercial después del vencimiento efectivo y la separa en anticipada, mismo mes, mes siguiente dentro de 30 días, reactivación entre 31 y 365 días, resurrección después de un año y sin retorno observado. Las cohortes recientes permanecen abiertas hasta completar la ventana correspondiente.
+
 El tablero conserva además la tasa a 90 días como referencia diagnóstica, pero la clasificación operativa usa el umbral de 30 días solicitado.
 
 ## Comparaciones y metas

@@ -14,6 +14,7 @@
 
   const purchaseIndex = new Map();
   const nextPurchaseValue = new Map();
+  const nextPurchaseRow = new Map();
   const purchasesByCustomer = new Map();
   data.transactions.forEach(row => {
     if (!purchasesByCustomer.has(row[TX.customer])) purchasesByCustomer.set(row[TX.customer], []);
@@ -22,6 +23,7 @@
   purchasesByCustomer.forEach(rows => rows.sort((a, b) => a[TX.date].localeCompare(b[TX.date])).forEach((row, index) => {
     purchaseIndex.set(row, index);
     nextPurchaseValue.set(row, rows[index + 1]?.[TX.value] || 0);
+    nextPurchaseRow.set(row, rows[index + 1] || null);
   }));
 
   const addYears = (value, years) => {
@@ -199,6 +201,75 @@
     $("renewalDepthTable").replaceChildren(...rows);
   }
 
+  function renderReturnTiming(currentFilters) {
+    const currentMonth = data.generatedAt.slice(0, 7);
+    const focusMonth = shiftMonth(currentMonth, -1);
+    const months = Array.from({ length: 24 }, (_, index) => shiftMonth(currentMonth, index - 23));
+    const cutoff = new Date(`${data.generatedAt}T00:00:00Z`);
+    const dayGap = (after, before) => Math.round((new Date(`${after}T00:00:00Z`) - new Date(`${before}T00:00:00Z`)) / 86400000);
+    const addDays = (value, amount) => { const date = new Date(`${value}T00:00:00Z`); date.setUTCDate(date.getUTCDate() + amount); return date; };
+    const dimensionMatch = row => (currentFilters.discipline === "Todos" || row[TX.disciplines].includes(currentFilters.discipline))
+      && (currentFilters.instructor === "Todos" || row[TX.instructor] === currentFilters.instructor)
+      && (currentFilters.family === "Todos" || row[TX.family] === currentFilters.family);
+
+    function timing(month) {
+      const latest = new Map();
+      data.transactions.forEach(row => {
+        if (!row[TX.effectiveDue]?.startsWith(month) || !dimensionMatch(row)) return;
+        const existing = latest.get(row[TX.customer]);
+        if (!existing || row[TX.date] > existing[TX.date]) latest.set(row[TX.customer], row);
+      });
+      const keys = ["early", "same", "next", "reactivation", "resurrection", "none"];
+      const buckets = Object.fromEntries(keys.map(key => [key, { count: 0, revenue: 0 }]));
+      latest.forEach(row => {
+        const next = nextPurchaseRow.get(row);
+        if (!next) { buckets.none.count += 1; return; }
+        const gap = dayGap(next[TX.date], row[TX.effectiveDue]);
+        let key;
+        if (gap < 0) key = "early";
+        else if (next[TX.date].slice(0, 7) === month) key = "same";
+        else if (next[TX.date].slice(0, 7) === shiftMonth(month, 1) && gap <= 30) key = "next";
+        else if (gap <= 365) key = "reactivation";
+        else key = "resurrection";
+        buckets[key].count += 1;
+        buckets[key].revenue += Number(next[TX.value] || 0);
+      });
+      const returned = keys.filter(key => key !== "none").reduce((total, key) => total + buckets[key].count, 0);
+      const revenue = keys.filter(key => key !== "none").reduce((total, key) => total + buckets[key].revenue, 0);
+      const end = monthEnd(month);
+      const maturity = addDays(end, 365) <= cutoff ? "365d cerrada" : addDays(end, 30) <= cutoff ? "30d cerrada" : "Abierta";
+      return { month, total: latest.size, buckets, returned, revenue, maturity };
+    }
+
+    const results = months.map(timing);
+    const focus = results.find(result => result.month === focusMonth);
+    const immediate = { count: focus.buckets.early.count + focus.buckets.same.count, revenue: focus.buckets.early.revenue + focus.buckets.same.revenue };
+    const cards = [
+      ["Antes o mismo mes", immediate.count, immediate.revenue],
+      ["Mes siguiente ≤30d", focus.buckets.next.count, focus.buckets.next.revenue],
+      ["Reactivación 31–365d", focus.buckets.reactivation.count, focus.buckets.reactivation.revenue],
+      ["Sin retorno observado", focus.buckets.none.count, 0],
+      ["Ingreso recuperado", focus.returned, focus.revenue],
+    ];
+    $("returnTimingCards").replaceChildren(...cards.map(([label, count, revenue]) => {
+      const card = document.createElement("article"); card.className = "return-timing-card";
+      const title = document.createElement("span"); title.textContent = `${label} · ${monthLabel(focusMonth)}`;
+      const value = document.createElement("strong"); value.textContent = integer.format(count);
+      const detail = document.createElement("p"); detail.textContent = revenue ? currency.format(revenue) : label.includes("Sin retorno") ? "Cohorte todavía abierta" : "Sin ingreso observado";
+      card.append(title, value, detail); return card;
+    }));
+
+    $("returnTimingTable").replaceChildren(...[...results].reverse().map(result => {
+      const row = document.createElement("tr");
+      const bucketCell = key => `${integer.format(result.buckets[key].count)} · ${currency.format(result.buckets[key].revenue)}`;
+      cell(row, monthLabel(result.month)); cell(row, result.maturity); cell(row, integer.format(result.total));
+      cell(row, bucketCell("early")); cell(row, bucketCell("same")); cell(row, bucketCell("next"));
+      cell(row, bucketCell("reactivation")); cell(row, bucketCell("resurrection")); cell(row, integer.format(result.buckets.none.count));
+      cell(row, result.total ? percent.format(result.returned / result.total) : "—"); cell(row, currency.format(result.revenue));
+      return row;
+    }));
+  }
+
   function render() {
     const currentFilters = filters();
     if (!currentFilters.start || !currentFilters.end) return;
@@ -241,6 +312,7 @@
     lifecycleRows.push(comparisonRow("Total", aggregate(currentRows, "Total"), aggregate(priorRows, "Total"), true));
     body.replaceChildren(...lifecycleRows);
     renderRenewalDepth(currentFilters);
+    renderReturnTiming(currentFilters);
   }
 
   ["periodFilter", "startDate", "endDate", "lifecycleFilter", "disciplineFilter", "instructorFilter", "familyFilter"]
