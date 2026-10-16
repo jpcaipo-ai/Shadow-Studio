@@ -10,6 +10,7 @@ Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server
 
 - El filtro **Periodo o mes** comienza en el mes más reciente disponible y ordena los meses hacia atrás. Después muestra periodos predefinidos y la opción **Personalizado** para elegir una fecha inicial y final.
 - **Exportar resumen** descarga los KPI y alertas principales de la selección actual.
+- El bloque principal separa la facturación de nuevos, clientes nuevos y ticket de nuevos; todos se comparan contra el mismo periodo del año anterior.
 - **Exportar transacciones** descarga las transacciones que cumplen todos los filtros activos.
 - Los filtros de disciplina y profesor modifican realmente los KPI, gráficas y tablas; no son controles decorativos.
 - La versión web pública no incluye nombres ni DNI. Cada cliente utiliza un código anónimo para conservar los cálculos de pagadores únicos, recurrencia y lifecycle.

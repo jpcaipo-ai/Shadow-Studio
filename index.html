@@ -39,10 +39,12 @@
 
     <section class="view active" data-view-panel="overview">
       <article class="emergency-card"><div><p class="eyebrow danger">Alerta de facturación</p><h2 id="projectionHeadline">Calculando proyección…</h2><p id="projectionNarrative" class="lead"></p></div><div class="pace-block"><div class="pace-label"><span>Avance contra meta mensual</span><strong id="goalProgressLabel">—</strong></div><div class="progress-track"><span id="goalProgress"></span></div><div class="pace-foot"><span id="dailyPace"></span><span id="targetGap"></span></div></div></article>
-      <div class="kpi-grid" aria-live="polite">
+      <div class="kpi-grid overview-kpis" aria-live="polite">
         <article><span>Facturación</span><strong id="revenueKpi">—</strong><small id="revenueDelta">—</small></article>
+        <article><span>Facturación de nuevos</span><strong id="newRevenueKpi">—</strong><small id="newRevenueDelta">—</small></article>
         <article><span>Facturación recurrente</span><strong id="repeatRevenueKpi">—</strong><small id="repeatRevenueDelta">—</small></article>
         <article><span>Nuevos clientes</span><strong id="newCustomersKpi">—</strong><small id="newCustomersDelta">—</small></article>
+        <article><span>Ticket de nuevos</span><strong id="newTicketKpi">—</strong><small id="newTicketDelta">—</small></article>
         <article><span>Ticket promedio</span><strong id="ticketKpi">—</strong><small id="ticketDelta">—</small></article>
         <article><span>Asistencias</span><strong id="attendanceKpi">—</strong><small id="attendanceDelta">—</small></article>
         <article><span>Activos al corte</span><strong id="activeKpi">—</strong><small id="inactiveKpi">—</small></article>
@@ -68,7 +70,7 @@
       <article class="panel table-panel"><div class="panel-heading"><div><h3>Retorno por mes de vencimiento efectivo</h3><p>La renovación continua llega hasta 30 días; de 31 a 365 días se clasifica como reactivación y después de un año como resurrección.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Madurez</th><th>Vencieron</th><th>Antes de vencer</th><th>Mismo mes</th><th>Mes siguiente ≤30d</th><th>Reactivación 31–365d</th><th>Resurrección +365d</th><th>Sin retorno</th><th>Retorno total</th><th>Ingreso recuperado</th></tr></thead><tbody id="returnTimingTable"></tbody></table></div></article>
       <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Activos e inactivos por mes</h3><p>Foto al cierre; el mes actual usa el corte disponible.</p></div></div><div id="activeInactiveChart" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>Renovación por vencimiento</h3><p>Solo cohortes con 30 días completos.</p></div></div><div id="renewalChart" class="chart tall"></div></article></div>
       <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Renovación por consumo</h3><p>Más uso se asocia con mayor retención.</p></div></div><div id="attendanceRetentionChart" class="chart"></div></article><article class="panel"><div class="panel-heading"><div><h3>Renovación por variedad</h3><p>Disciplinas consumidas en la primera membresía.</p></div></div><div id="disciplineRetentionChart" class="chart"></div></article></div>
-      <article class="panel table-panel"><div class="panel-heading"><div><h3>Lifecycle mensual</h3><p>Compras y facturación por ciclo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Nuevo</th><th>Renovación</th><th>Reactivación</th><th>Resurrección</th><th>Facturación</th></tr></thead><tbody id="lifecycleTable"></tbody></table></div></article>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Lifecycle mensual</h3><p>Clientes, compras y facturación por ciclo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Nuevos</th><th>Facturación nuevos</th><th>Ticket nuevos</th><th>Renovación</th><th>Reactivación</th><th>Resurrección</th><th>Facturación total</th></tr></thead><tbody id="lifecycleTable"></tbody></table></div></article>
     </section>
 
     <section class="view" data-view-panel="acquisition">
