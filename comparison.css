@@ -81,11 +81,17 @@
 .renewal-depth-table tbody td:nth-child(11),
 .renewal-depth-table tbody td:nth-child(17) { font-weight: 800; color: var(--purple); }
 
+.acquisition-kpis { margin-bottom: 10px; }
+.acquisition-note { margin: 0 2px 14px; }
+.offer-card .offer-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.offer-card .offer-stats strong { font-size: 18px; }
+
 @media (max-width: 1100px) {
   .lifecycle-compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .renewal-depth-grid { grid-template-columns: 1fr; }
   .renewal-forecast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .return-timing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .offer-card .offer-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {

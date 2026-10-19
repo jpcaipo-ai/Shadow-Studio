@@ -24,7 +24,7 @@ Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server
 
 ## Actualización de datos
 
-El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente incluye **ventas al 16 de octubre de 2026** y **asistencias/adquisición al 15 de octubre de 2026**. El export más reciente reemplaza únicamente el tramo de octubre que se superpone con la base histórica, evitando duplicar transacciones.
+El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente incluye **ventas, asistencias y adquisición al 19 de octubre de 2026**. Los exports más recientes reemplazan únicamente el tramo de octubre que se superpone con la base histórica, evitando duplicar registros.
 
 ## Estructura
 
@@ -37,7 +37,9 @@ El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el 
 
 El tablero cruza ventas, clases de prueba y asistencias sin exponer datos personales. La conversión de prueba se define como la compra de un paquete dentro de los 30 días posteriores. Las cohortes con menos de 30 días se muestran como inmaduras.
 
-El volumen de clases de prueba agrupa Free Pass y 2×1, con desglose mensual por fecha de venta. El análisis de uso de ambas clases se mantiene separado y aplica únicamente al 2×1.
+El volumen de adquisición agrupa bookings de Free Pass, 2×1 y 1 clase, con desglose mensual por fecha de venta o emisión. Cada booking muestra primer show, segundo show, conversión observada y conversión madura a 30 días. Los bookings posteriores a una compra core quedan fuera de adquisición de nuevos.
+
+Los nuevos core son clientes que compran por primera vez un paquete distinto de 1 clase y de Friends & Family. Se separan entre atribuidos a una oferta de entrada dentro de 30 días y adquisición directa.
 
 La probabilidad de renovación se calcula sobre vencimientos históricos maduros. Los vencimientos próximos usan la fecha final real de cada membresía. El export de asistencias no contiene fecha de reserva, inasistencias ni aforo configurado; por eso la capacidad muestra carga observada y no ocupación o anticipación de agenda.
 
