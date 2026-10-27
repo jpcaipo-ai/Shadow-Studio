@@ -6,9 +6,9 @@
   <meta name="description" content="Tablero de Growth, lifecycle, adquisición y consumo de Shadow Studio.">
   <title>Shadow Studio · Growth Command Center</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236c2aa0'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' font-family='Arial' font-weight='700' fill='white'%3ES%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20261027-2">
-  <link rel="stylesheet" href="comparison.css?v=20261027-2">
-  <link rel="stylesheet" href="command-center.css?v=20261027-2">
+  <link rel="stylesheet" href="styles.css?v=20261027-3">
+  <link rel="stylesheet" href="comparison.css?v=20261027-3">
+  <link rel="stylesheet" href="command-center.css?v=20261027-3">
 </head>
 <body>
   <header class="topbar">
@@ -89,6 +89,18 @@
       <div class="section-title"><div><p class="eyebrow">Embudo</p><h2>Bookings, shows y nuevos clientes</h2></div><button id="exportAcquisition" class="button" type="button">Exportar adquisición</button></div>
       <div class="kpi-grid compact acquisition-kpis" aria-live="polite"><article><span>Bookings de entrada</span><strong id="bookingKpi">—</strong><small>Por fecha de venta o emisión</small></article><article><span>Primer show</span><strong id="firstShowKpi">—</strong><small id="firstShowRate">—</small></article><article><span>Segundo show</span><strong id="secondShowKpi">—</strong><small id="secondShowRate">—</small></article><article><span>Convirtieron ≤30d</span><strong id="acquisitionConvertedKpi">—</strong><small id="acquisitionConvertedRate">—</small></article><article><span>Nuevos paquete core</span><strong id="newCoreKpi">—</strong><small id="newCoreRevenue">—</small></article><article><span>Nuevos directos</span><strong id="directNewKpi">—</strong><small id="directNewRate">—</small></article></div>
       <p class="scope-note acquisition-note">Booking = Free Pass, 2×1 o 1 clase emitida. Nuevo core = primera compra de un paquete distinto de 1 clase; Friends & Family queda excluido.</p>
+      <div class="section-title"><div><p class="eyebrow">Atribución de pruebas</p><h2>Qué fuente genera cada clase de prueba</h2></div><div class="inline-actions"><label class="compact-control">Origen<select id="trialSourceFilter"></select></label><button id="exportTrialAttribution" class="button secondary" type="button">Exportar atribución</button></div></div>
+      <p id="trialAttributionCoverage" class="coverage-banner"></p>
+      <div class="kpi-grid compact trial-source-kpis">
+        <article><span>Pruebas en cobertura</span><strong id="trialSourceBookingsKpi">—</strong><small id="trialSourceMixKpi">—</small></article>
+        <article><span>Origen trazable</span><strong id="trialSourceMatchedKpi">—</strong><small id="trialSourceMatchedRate">—</small></article>
+        <article><span>Primer show</span><strong id="trialSourceShowKpi">—</strong><small id="trialSourceShowRate">—</small></article>
+        <article><span>Compró paquete ≤30d</span><strong id="trialSourceConvertedKpi">—</strong><small id="trialSourceConvertedRate">—</small></article>
+      </div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Volumen por origen</h3><p>Último contacto atribuible hasta el día del booking.</p></div></div><div id="trialSourceChart" class="simple-bars"></div></article><article class="panel"><div class="panel-heading"><div><h3>Funnel del origen seleccionado</h3><p>Booking, show y compra del paquete dentro de 30 días.</p></div></div><div id="trialSourceFunnel" class="stage-funnel"></div></article></div>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Rendimiento por fuente</h3><p>El volumen y la conversión se calculan sobre la fecha de emisión de la prueba.</p></div></div><div class="table-wrap"><table><thead><tr><th>Origen</th><th>Pruebas</th><th>2×1</th><th>Free Pass</th><th>1 clase</th><th>Show 1</th><th>Tasa show</th><th>Compraron ≤30d</th><th>Conversión</th><th>Ingreso posterior</th></tr></thead><tbody id="trialSourceTable"></tbody></table></div></article>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Detalle de campañas y rutas</h3><p>Headline del anuncio cuando existe señal explícita; los orígenes no etiquetados se mantienen separados.</p></div></div><div class="table-wrap"><table><thead><tr><th>Detalle</th><th>Origen</th><th>Pruebas</th><th>Show 1</th><th>Compraron ≤30d</th><th>Conversión</th></tr></thead><tbody id="trialSourceDetailTable"></tbody></table></div></article>
+      <article class="method-card"><h3>Regla de atribución</h3><div class="method-grid"><p><strong>Ventana.</strong> Se toma el último contacto identificable en los 30 días previos y hasta el mismo día de emisión de la clase de prueba.</p><p><strong>Alta confianza.</strong> El mensaje incluye una señal explícita de Headline Ads o Instagram y el contacto cruza con el cliente por teléfono o datos capturados.</p><p><strong>Media confianza.</strong> Existe conversación cruzada, pero el origen no viene etiquetado y se conserva como WhatsApp directo / otro.</p><p><strong>Sin atribución.</strong> No se fuerza una fuente cuando no existe conversación vinculada dentro de la ventana.</p></div></article>
       <div class="section-title"><div><p class="eyebrow">2×1 · octubre</p><h2>La caída entre primer show y segunda agenda</h2></div><p id="twoStageContext">Reservas cruzadas con asistencias y compras.</p></div>
       <div id="twoStageCards" class="stage-card-grid"></div>
       <article class="panel"><div class="panel-heading"><div><h3>Embudo operativo del 2×1</h3><p>Incluye la etapa intermedia Agenda 2 para separar falla comercial de no-show.</p></div></div><div id="twoStageFunnel" class="stage-funnel"></div></article>
@@ -133,6 +145,6 @@
     <section class="methodology"><details><summary>Metodología, privacidad y límites</summary><div class="method-grid"><p><strong>Privacidad.</strong> La web contiene códigos anónimos; no publica datos personales.</p><p><strong>Lifecycle.</strong> Nuevo: primera compra. Renovación: ≤30 días. Reactivación: 31–365 días. Resurrección: más de un año.</p><p><strong>Adquisición.</strong> Se cuentan bookings reales previos a la primera compra core. Show 1 y Show 2 usan asistencias del plan de entrada; la conversión se atribuye al último booking previo dentro de 30 días.</p><p><strong>Vencimiento efectivo.</strong> Se usa la primera fecha entre fin contractual y agotamiento de clases cuando el cupo puede inferirse del plan. Los planes ilimitados o sin cupo identificable usan fecha fin.</p><p><strong>Calidad.</strong> Hay 45 membresías sin fecha de fin; no entran en vencimiento ni churn salvo que se detecte agotamiento de clases.</p></div></details></section>
   </main>
   <footer><p id="footerCutoff">Shadow Studio · Growth Command Center</p></footer>
-  <script src="data.js?v=20261027-2"></script><script src="app.js?v=20261027-2"></script><script src="comparison.js?v=20261027-2"></script><script src="command-center.js?v=20261027-2"></script>
+  <script src="data.js?v=20261027-3"></script><script src="app.js?v=20261027-3"></script><script src="comparison.js?v=20261027-3"></script><script src="command-center.js?v=20261027-3"></script>
 </body>
 </html>

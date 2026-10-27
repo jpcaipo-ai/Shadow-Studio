@@ -13,6 +13,7 @@ Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server
 - El bloque principal separa la facturación de nuevos, clientes nuevos y ticket de nuevos; todos se comparan contra el mismo periodo del año anterior.
 - **Exportar transacciones** descarga las transacciones que cumplen todos los filtros activos.
 - **Exportar auditoría** descarga la lectura anonimizada por conversación: origen, señal caliente, seguimiento, booking, venta y riesgos de fuga.
+- **Exportar atribución** descarga cada clase de prueba con su fuente, headline o ruta, nivel de confianza, shows y compra posterior.
 - El comparador configurable permite elegir cuatro widgets y enfrentar dos métricas contra el mes anterior o el mismo periodo del año anterior. La selección se conserva en el navegador.
 - Los filtros de disciplina y profesor modifican realmente los KPI, gráficas y tablas; no son controles decorativos.
 - La versión web pública no incluye nombres ni DNI. Cada cliente utiliza un código anónimo para conservar los cálculos de pagadores únicos, recurrencia y lifecycle.
@@ -44,6 +45,8 @@ El tablero cruza ventas, clases de prueba y asistencias sin exponer datos person
 El volumen de adquisición agrupa bookings de Free Pass, 2×1 y 1 clase, con desglose mensual por fecha de venta o emisión. Cada booking muestra primer show, segundo show, conversión observada y conversión madura a 30 días. Los bookings posteriores a una compra core quedan fuera de adquisición de nuevos.
 
 Para el 2×1, el tablero añade las etapas Agenda 1, Show 1, Agenda 2, Show 2 y compra de paquete. Esta lectura usa el reporte de reservas para separar la caída de agendamiento de la inasistencia.
+
+La atribución de clases de prueba usa el último contacto identificable de los 30 días previos y hasta el mismo día de emisión. Headline Ads e Instagram requieren una señal explícita en la conversación; WhatsApp / otro conserva los contactos cruzados sin etiqueta de origen. Los casos sin conversación vinculada permanecen como **Sin origen trazable** y no se reasignan por inferencia.
 
 ## Conversaciones
 

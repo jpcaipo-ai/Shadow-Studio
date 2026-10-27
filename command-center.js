@@ -12,6 +12,7 @@
   const CE = { date: 0, contact: 1, source: 2, type: 3, read: 4 };
   const CI = { date: 0, contact: 1, source: 2, meaningful: 3 };
   const ST = { date: 0, customer: 1, agenda1: 2, show1: 3, agenda2: 4, show2: 5, converted: 6, value: 7 };
+  const TA = { date: 0, customer: 1, type: 2, source: 3, detail: 4, signalDate: 5, confidence: 6, matchMethod: 7, attendances: 8, show1: 9, show2: 10, converted: 11, conversionDate: 12, value: 13, path: 14 };
   const integer = new Intl.NumberFormat("es-PE", { maximumFractionDigits: 0 });
   const currency = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", maximumFractionDigits: 0 });
   const percent = new Intl.NumberFormat("es-PE", { style: "percent", maximumFractionDigits: 1 });
@@ -43,6 +44,13 @@
   function attendanceRows(range) { const c = controls(); return data.attendance.filter(row => between(row[AT.date], range) && (c.discipline === "Todos" || row[AT.discipline] === c.discipline) && (c.instructor === "Todos" || row[AT.instructor] === c.instructor)); }
   function entryRows(range) { const c = controls(); return data.entries.filter(row => between(row[EN.date], range) && (c.entry === "Todos" || row[EN.type] === c.entry)); }
   function coreRows(range) { return data.coreNew.filter(row => between(row[CN.date], range)); }
+  function trialAttributionRows(range, applyLocal = false) {
+    const c = controls();
+    const source = applyLocal ? $("trialSourceFilter").value : "Todos";
+    return (data.trialAttribution || []).filter(row => between(row[TA.date], range)
+      && (c.entry === "Todos" || row[TA.type] === c.entry)
+      && (source === "Todos" || row[TA.source] === source));
+  }
   function conversationEnd(range) { return range.end === data.dateMax ? data.conversationCoverage.end : range.end; }
   function conversationRows(range, applyLocal = false) {
     const source = applyLocal ? $("conversationSourceFilter").value : "Todos";
@@ -100,6 +108,9 @@
     secondShows: { label: "Segundo show", format: "integer", calc: range => entryRows(range).filter(row => row[EN.attendances] >= 2).length },
     trialConversions: { label: "Conversiones de prueba ≤30d", format: "integer", calc: range => entryRows(range).filter(row => row[EN.converted]).length },
     trialConversionRate: { label: "Tasa de conversión de prueba", format: "percent", calc: range => { const rows = entryRows(range); return ratio(rows.filter(row => row[EN.converted]).length, rows.length) || 0; } },
+    trialTraceCoverage: { label: "Pruebas con origen trazable", format: "percent", conversation: true, calc: range => { const rows = trialAttributionRows(range); return ratio(rows.filter(row => row[TA.source] !== "Sin origen trazable").length, rows.length) || 0; } },
+    trialsFromAds: { label: "Pruebas atribuidas a Ads", format: "integer", conversation: true, calc: range => trialAttributionRows(range).filter(row => row[TA.source] === "Headline Ads").length },
+    trialConversionsFromAds: { label: "Compras desde pruebas de Ads", format: "integer", conversation: true, calc: range => trialAttributionRows(range).filter(row => row[TA.source] === "Headline Ads" && row[TA.converted]).length },
     newCore: { label: "Nuevos paquete core", format: "integer", calc: range => coreRows(range).length },
     hotLeads: { label: "Leads calientes", format: "integer", conversation: true, calc: range => conversationRows(range).filter(row => row[CC.hot]).length },
     hotFollowupRate: { label: "Seguimiento a leads calientes", format: "percent", conversation: true, calc: range => { const rows = conversationRows(range).filter(row => row[CC.hot]); return ratio(rows.filter(row => row[CC.followup]).length, rows.length) || 0; } },
@@ -204,6 +215,86 @@
     }));
   }
 
+  function appendTableRow(values, formats = {}) {
+    const tr = document.createElement("tr");
+    values.forEach((value, index) => {
+      const td = document.createElement("td");
+      td.textContent = formats[index] === "percent" ? percent.format(value || 0)
+        : formats[index] === "currency" ? currency.format(value || 0)
+          : typeof value === "number" ? integer.format(value) : value;
+      tr.append(td);
+    });
+    return tr;
+  }
+
+  function renderTrialAttribution() {
+    const range = currentRange();
+    const rows = trialAttributionRows(range, true);
+    const matched = rows.filter(row => row[TA.source] !== "Sin origen trazable");
+    const show1 = rows.filter(row => row[TA.show1]);
+    const show2 = rows.filter(row => row[TA.show2]);
+    const converted = rows.filter(row => row[TA.converted]);
+    const selectedSource = $("trialSourceFilter").value;
+    $("trialSourceBookingsKpi").textContent = integer.format(rows.length);
+    $("trialSourceMixKpi").textContent = selectedSource === "Todos" ? "todos los orígenes" : selectedSource;
+    $("trialSourceMatchedKpi").textContent = integer.format(matched.length);
+    $("trialSourceMatchedRate").textContent = `${percent.format(ratio(matched.length, rows.length) || 0)} de las pruebas`;
+    $("trialSourceShowKpi").textContent = integer.format(show1.length);
+    $("trialSourceShowRate").textContent = `${percent.format(ratio(show1.length, rows.length) || 0)} de las pruebas`;
+    $("trialSourceConvertedKpi").textContent = integer.format(converted.length);
+    $("trialSourceConvertedRate").textContent = `${percent.format(ratio(converted.length, rows.length) || 0)} de las pruebas`;
+    const coverageState = coverage(range);
+    $("trialAttributionCoverage").textContent = coverageState === "none"
+      ? `Sin cobertura de origen para este periodo. Conversaciones disponibles del ${data.conversationCoverage.start} al ${data.conversationCoverage.end}.`
+      : `${coverageState === "partial" ? "Cobertura parcial" : "Cobertura completa"}: la fuente se cruza con conversaciones del ${data.conversationCoverage.start} al ${data.conversationCoverage.end}. “Sin origen trazable” permanece separado y no se reasigna.`;
+
+    const allSources = data.dimensions.trialSources || [];
+    const sourceNames = selectedSource === "Todos" ? allSources : [selectedSource];
+    const sourceGroups = sourceNames.map(source => ({ source, group: rows.filter(row => row[TA.source] === source) })).filter(item => item.group.length);
+    simpleBars($("trialSourceChart"), sourceGroups.map(item => ({ label: item.source, value: item.group.length })).sort((a, b) => b.value - a.value));
+    $("trialSourceFunnel").replaceChildren(
+      stageStep("Pruebas emitidas", rows.length, null),
+      stageStep("Show 1", show1.length, rows.length),
+      stageStep("Show 2", show2.length, show1.length),
+      stageStep("Compró paquete ≤30d", converted.length, rows.length)
+    );
+
+    $("trialSourceTable").replaceChildren(...sourceGroups.map(({ source, group }) => {
+      const conversions = group.filter(row => row[TA.converted]);
+      return appendTableRow([
+        source,
+        group.length,
+        group.filter(row => row[TA.type] === "2x1").length,
+        group.filter(row => row[TA.type] === "Free Pass").length,
+        group.filter(row => row[TA.type] === "1 Clase").length,
+        group.filter(row => row[TA.show1]).length,
+        ratio(group.filter(row => row[TA.show1]).length, group.length) || 0,
+        conversions.length,
+        ratio(conversions.length, group.length) || 0,
+        sum(conversions.map(row => row[TA.value])),
+      ], { 6: "percent", 8: "percent", 9: "currency" });
+    }));
+
+    const details = new Map();
+    rows.forEach(row => {
+      const key = `${row[TA.source]}\u0000${row[TA.detail]}`;
+      if (!details.has(key)) details.set(key, { source: row[TA.source], detail: row[TA.detail], rows: [] });
+      details.get(key).rows.push(row);
+    });
+    const detailRows = [...details.values()].sort((a, b) => b.rows.length - a.rows.length);
+    $("trialSourceDetailTable").replaceChildren(...detailRows.map(item => {
+      const conversions = item.rows.filter(row => row[TA.converted]).length;
+      return appendTableRow([
+        item.detail,
+        item.source,
+        item.rows.length,
+        item.rows.filter(row => row[TA.show1]).length,
+        conversions,
+        ratio(conversions, item.rows.length) || 0,
+      ], { 5: "percent" });
+    }));
+  }
+
   function renderConversations() {
     const range = currentRange();
     const rows = conversationRows(range, true), events = conversationEvents(range, true), activity = inboundActivity(range, true);
@@ -266,12 +357,24 @@
     const url = URL.createObjectURL(blob), link = document.createElement("a"); link.href = url; link.download = `shadow-auditoria-conversaciones-${currentRange().start}-${currentRange().end}.csv`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 500);
   }
 
-  function renderAll() { renderMetricLab(); renderTwoStages(); renderConversations(); }
+  function exportTrialAttribution() {
+    const rows = trialAttributionRows(currentRange(), true);
+    const output = [["fecha_prueba", "cliente_anonimo", "oferta_entrada", "origen_atribuido", "detalle_origen", "fecha_senal", "confianza", "metodo_cruce", "asistencias", "show_1", "show_2", "compro_paquete_30d", "fecha_compra", "monto_compra", "ruta_origen"], ...rows.map(row => [
+      row[TA.date], row[TA.customer], row[TA.type], row[TA.source], row[TA.detail], row[TA.signalDate], row[TA.confidence], row[TA.matchMethod], row[TA.attendances], row[TA.show1] ? "Sí" : "No", row[TA.show2] ? "Sí" : "No", row[TA.converted] ? "Sí" : "No", row[TA.conversionDate], row[TA.value], row[TA.path],
+    ])];
+    const blob = new Blob(["\uFEFF" + output.map(row => row.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob), link = document.createElement("a"); link.href = url; link.download = `shadow-atribucion-pruebas-${currentRange().start}-${currentRange().end}.csv`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 500);
+  }
+
+  function renderAll() { renderMetricLab(); renderTrialAttribution(); renderTwoStages(); renderConversations(); }
   const sourceSelect = $("conversationSourceFilter");
   sourceSelect.replaceChildren(...["Todos", ...data.dimensions.conversationSources].map(value => { const option = document.createElement("option"); option.value = value; option.textContent = value; return option; }));
+  const trialSourceSelect = $("trialSourceFilter");
+  trialSourceSelect.replaceChildren(...["Todos", ...(data.dimensions.trialSources || [])].map(value => { const option = document.createElement("option"); option.value = value; option.textContent = value; return option; }));
   ["periodFilter", "startDate", "endDate", "lifecycleFilter", "disciplineFilter", "instructorFilter", "familyFilter", "entryFilter"].forEach(id => $(id).addEventListener("change", renderAll));
-  ["conversationSourceFilter", "conversationStatusFilter", "metricComparisonMode", "metricA", "metricB"].forEach(id => $(id).addEventListener("change", renderAll));
-  $("resetFilters").addEventListener("click", () => { sourceSelect.value = "Todos"; $("conversationStatusFilter").value = "Todos"; setTimeout(renderAll, 0); });
+  ["conversationSourceFilter", "conversationStatusFilter", "trialSourceFilter", "metricComparisonMode", "metricA", "metricB"].forEach(id => $(id).addEventListener("change", renderAll));
+  $("resetFilters").addEventListener("click", () => { sourceSelect.value = "Todos"; trialSourceSelect.value = "Todos"; $("conversationStatusFilter").value = "Todos"; setTimeout(renderAll, 0); });
   $("exportConversations").addEventListener("click", exportConversations);
+  $("exportTrialAttribution").addEventListener("click", exportTrialAttribution);
   renderAll();
 })();
