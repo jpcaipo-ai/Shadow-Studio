@@ -8,6 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236c2aa0'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' font-family='Arial' font-weight='700' fill='white'%3ES%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="comparison.css">
+  <link rel="stylesheet" href="command-center.css">
 </head>
 <body>
   <header class="topbar">
@@ -33,6 +34,7 @@
       <button class="tab-button active" data-view="overview" type="button">Diagnóstico</button>
       <button class="tab-button" data-view="lifecycle" type="button">Lifecycle</button>
       <button class="tab-button" data-view="acquisition" type="button">Adquisición</button>
+      <button class="tab-button" data-view="conversations" type="button">Conversaciones</button>
       <button class="tab-button" data-view="product" type="button">Producto y disciplinas</button>
       <button class="tab-button" data-view="instructors" type="button">Profesores</button>
     </nav>
@@ -49,6 +51,16 @@
         <article><span>Asistencias</span><strong id="attendanceKpi">—</strong><small id="attendanceDelta">—</small></article>
         <article><span>Activos al corte</span><strong id="activeKpi">—</strong><small id="inactiveKpi">—</small></article>
       </div>
+      <section class="metric-lab" aria-labelledby="metricLabTitle">
+        <div class="section-title metric-lab-heading"><div><p class="eyebrow">Comparador configurable</p><h2 id="metricLabTitle">Enfrenta las métricas que importan</h2></div><label class="compare-mode">Comparar contra<select id="metricComparisonMode"><option value="previousMonth">Mes anterior, mismos días</option><option value="priorYear">Mismo periodo del año anterior</option></select></label></div>
+        <div class="metric-widget-grid">
+          <article class="metric-widget" data-widget="0"><select class="widget-metric" aria-label="Métrica del widget 1"></select><strong class="widget-value">—</strong><span class="widget-comparison">—</span></article>
+          <article class="metric-widget" data-widget="1"><select class="widget-metric" aria-label="Métrica del widget 2"></select><strong class="widget-value">—</strong><span class="widget-comparison">—</span></article>
+          <article class="metric-widget" data-widget="2"><select class="widget-metric" aria-label="Métrica del widget 3"></select><strong class="widget-value">—</strong><span class="widget-comparison">—</span></article>
+          <article class="metric-widget" data-widget="3"><select class="widget-metric" aria-label="Métrica del widget 4"></select><strong class="widget-value">—</strong><span class="widget-comparison">—</span></article>
+        </div>
+        <article class="panel metric-duel-panel"><div class="metric-duel-controls"><label>Métrica izquierda<select id="metricA"></select></label><span>vs.</span><label>Métrica derecha<select id="metricB"></select></label></div><div id="metricDuel" class="metric-duel"></div></article>
+      </section>
       <div class="section-title"><div><p class="eyebrow">Comparación justa</p><h2 id="comparisonTitle">Octubre contra octubre</h2></div><p>El periodo anterior usa exactamente los mismos días del mes.</p></div>
       <div class="grid two-one"><article class="panel"><div class="panel-heading"><div><h3>Facturación acumulada</h3><p id="cumulativeContext"></p></div><span class="legend"><i class="current"></i>Actual <i class="prior"></i>Año anterior</span></div><div id="cumulativeRevenueChart" class="chart tall"></div></article><article class="panel target-panel"><div class="panel-heading"><div><h3>Meta por lifecycle</h3><p>Objetivos calibrados con julio–septiembre.</p></div></div><div id="lifecycleTargets" class="target-list"></div></article></div>
       <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Facturación mensual por lifecycle</h3><p>La caída se explica por el mix, no solo por el total.</p></div></div><div id="lifecycleRevenueChart" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>Asistencia vs. facturación</h3><p>Índice mensual. Base 100 en el primer mes visible.</p></div></div><div id="revenueAttendanceChart" class="chart tall"></div></article></div>
@@ -77,9 +89,33 @@
       <div class="section-title"><div><p class="eyebrow">Embudo</p><h2>Bookings, shows y nuevos clientes</h2></div><button id="exportAcquisition" class="button" type="button">Exportar adquisición</button></div>
       <div class="kpi-grid compact acquisition-kpis" aria-live="polite"><article><span>Bookings de entrada</span><strong id="bookingKpi">—</strong><small>Por fecha de venta o emisión</small></article><article><span>Primer show</span><strong id="firstShowKpi">—</strong><small id="firstShowRate">—</small></article><article><span>Segundo show</span><strong id="secondShowKpi">—</strong><small id="secondShowRate">—</small></article><article><span>Convirtieron ≤30d</span><strong id="acquisitionConvertedKpi">—</strong><small id="acquisitionConvertedRate">—</small></article><article><span>Nuevos paquete core</span><strong id="newCoreKpi">—</strong><small id="newCoreRevenue">—</small></article><article><span>Nuevos directos</span><strong id="directNewKpi">—</strong><small id="directNewRate">—</small></article></div>
       <p class="scope-note acquisition-note">Booking = Free Pass, 2×1 o 1 clase emitida. Nuevo core = primera compra de un paquete distinto de 1 clase; Friends & Family queda excluido.</p>
+      <div class="section-title"><div><p class="eyebrow">2×1 · octubre</p><h2>La caída entre primer show y segunda agenda</h2></div><p id="twoStageContext">Reservas cruzadas con asistencias y compras.</p></div>
+      <div id="twoStageCards" class="stage-card-grid"></div>
+      <article class="panel"><div class="panel-heading"><div><h3>Embudo operativo del 2×1</h3><p>Incluye la etapa intermedia Agenda 2 para separar falla comercial de no-show.</p></div></div><div id="twoStageFunnel" class="stage-funnel"></div></article>
       <div id="offerCards" class="offer-grid"></div>
       <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Embudo por oferta</h3><p>Booking, primer show, segundo show y conversión observada.</p></div></div><div id="acquisitionFunnel" class="chart tall"></div></article><article class="panel"><div class="panel-heading"><div><h3>2×1 y combinación de disciplinas</h3><p>Conversión observada; las cohortes recientes siguen madurando.</p></div></div><div id="twoPatternChart" class="chart tall"></div></article></div>
       <article class="panel table-panel"><div class="panel-heading"><div><h3>Cohortes mensuales de adquisición</h3><p>Shows y conversiones se atribuyen al mes del booking. Los meses recientes siguen madurando.</p></div></div><div class="table-wrap"><table><thead><tr><th>Mes</th><th>Oferta</th><th>Bookings</th><th>Show 1</th><th>Show 2</th><th>Conv. observadas</th><th>Tasa observada</th><th>Maduros 30d</th><th>Conv. madura</th><th>Ticket posterior</th></tr></thead><tbody id="acquisitionTable"></tbody></table></div></article>
+    </section>
+
+    <section class="view" data-view-panel="conversations">
+      <div class="section-title"><div><p class="eyebrow">WhatsApp y CRM</p><h2>Calidad de conversación y fugas del funnel</h2></div><button id="exportConversations" class="button" type="button">Exportar auditoría</button></div>
+      <div class="conversation-filter-bar">
+        <label>Origen<select id="conversationSourceFilter"></select></label>
+        <label>Lectura<select id="conversationStatusFilter"><option value="Todos">Todos los contactos</option><option value="Calientes">Leads calientes</option><option value="Calientes sin seguimiento">Calientes sin seguimiento</option><option value="Abandonados">Cliente quedó sin respuesta</option><option value="Autoservicio sin seguimiento">Enviados a web sin seguimiento</option></select></label>
+      </div>
+      <p id="conversationCoverage" class="coverage-banner"></p>
+      <div class="kpi-grid compact conversation-kpis">
+        <article><span>Contactos inbound</span><strong id="inboundContactsKpi">—</strong><small id="engagedContactsKpi">—</small></article>
+        <article><span>Leads calientes</span><strong id="hotLeadsKpi">—</strong><small>sin contar el mensaje precargado</small></article>
+        <article><span>Seguimiento a calientes</span><strong id="hotFollowupKpi">—</strong><small id="hotFollowupRate">—</small></article>
+        <article class="risk-kpi"><span>Calientes abiertos sin seguimiento</span><strong id="hotLeakKpi">—</strong><small id="hotLeakRate">—</small></article>
+        <article class="risk-kpi"><span>Cliente quedó sin respuesta</span><strong id="abandonedKpi">—</strong><small>último mensaje inbound, más de 24 h</small></article>
+        <article class="risk-kpi"><span>Web/link sin seguimiento</span><strong id="selfServiceLeakKpi">—</strong><small id="selfServiceReadKpi">—</small></article>
+      </div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Funnel de leads calientes</h3><p>Respuesta inicial y seguimiento se miden por separado.</p></div></div><div id="hotLeadFunnel" class="stage-funnel"></div></article><article class="panel"><div class="panel-heading"><div><h3>Señal que volvió caliente al lead</h3><p>Primera intención real posterior al mensaje precargado.</p></div></div><div id="hotCategoryChart" class="simple-bars"></div></article></div>
+      <div class="grid two"><article class="panel"><div class="panel-heading"><div><h3>Mensajes de lifecycle y servicio</h3><p>Conteo de mensajes salientes clasificados por su contenido.</p></div></div><div id="conversationEventChart" class="simple-bars"></div></article><article class="panel"><div class="panel-heading"><div><h3>Derivación a autoservicio</h3><p>El estado “leído” confirma el mensaje, no que abrió el enlace.</p></div></div><div id="selfServiceChart" class="simple-bars"></div></article></div>
+      <article class="panel table-panel"><div class="panel-heading"><div><h3>Auditoría por origen</h3><p>Volumen, intención y fugas con los filtros seleccionados.</p></div></div><div class="table-wrap"><table><thead><tr><th>Origen</th><th>Contactos</th><th>Calientes</th><th>Seguimiento</th><th>Abiertos sin seguimiento</th><th>Sin respuesta del equipo</th><th>Web sin seguimiento</th><th>Ventas detectadas</th></tr></thead><tbody id="conversationSourceTable"></tbody></table></div></article>
+      <article class="method-card"><h3>Reglas de lectura</h3><div class="method-grid"><p><strong>Lead caliente.</strong> Después del mensaje precargado pregunta por agenda, disponibilidad, precio, plan o pago; expresa intención, acepta un CTA o comparte datos. Se excluyen clientes con paquete previo.</p><p><strong>Seguimiento manual.</strong> Recontacto del equipo al menos ocho horas después del último inbound. No incluye la respuesta inmediata ni workflows.</p><p><strong>Cliente sin respuesta.</strong> El cliente dejó el último mensaje sustantivo y no recibió respuesta en las siguientes 24 horas.</p><p><strong>Web sin seguimiento.</strong> Se envió web, horarios, app o link de reserva y luego no hubo respuesta del cliente ni recontacto del equipo en 24 horas.</p></div></article>
     </section>
 
     <section class="view" data-view-panel="product">
@@ -97,6 +133,6 @@
     <section class="methodology"><details><summary>Metodología, privacidad y límites</summary><div class="method-grid"><p><strong>Privacidad.</strong> La web contiene códigos anónimos; no publica datos personales.</p><p><strong>Lifecycle.</strong> Nuevo: primera compra. Renovación: ≤30 días. Reactivación: 31–365 días. Resurrección: más de un año.</p><p><strong>Adquisición.</strong> Se cuentan bookings reales previos a la primera compra core. Show 1 y Show 2 usan asistencias del plan de entrada; la conversión se atribuye al último booking previo dentro de 30 días.</p><p><strong>Vencimiento efectivo.</strong> Se usa la primera fecha entre fin contractual y agotamiento de clases cuando el cupo puede inferirse del plan. Los planes ilimitados o sin cupo identificable usan fecha fin.</p><p><strong>Calidad.</strong> Hay 45 membresías sin fecha de fin; no entran en vencimiento ni churn salvo que se detecte agotamiento de clases.</p></div></details></section>
   </main>
   <footer><p id="footerCutoff">Shadow Studio · Growth Command Center</p></footer>
-  <script src="data.js"></script><script src="app.js"></script><script src="comparison.js"></script>
+  <script src="data.js"></script><script src="app.js"></script><script src="comparison.js"></script><script src="command-center.js"></script>
 </body>
 </html>

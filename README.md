@@ -12,6 +12,8 @@ Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server
 - **Exportar resumen** descarga los KPI y alertas principales de la selección actual.
 - El bloque principal separa la facturación de nuevos, clientes nuevos y ticket de nuevos; todos se comparan contra el mismo periodo del año anterior.
 - **Exportar transacciones** descarga las transacciones que cumplen todos los filtros activos.
+- **Exportar auditoría** descarga la lectura anonimizada por conversación: origen, señal caliente, seguimiento, booking, venta y riesgos de fuga.
+- El comparador configurable permite elegir cuatro widgets y enfrentar dos métricas contra el mes anterior o el mismo periodo del año anterior. La selección se conserva en el navegador.
 - Los filtros de disciplina y profesor modifican realmente los KPI, gráficas y tablas; no son controles decorativos.
 - La versión web pública no incluye nombres ni DNI. Cada cliente utiliza un código anónimo para conservar los cálculos de pagadores únicos, recurrencia y lifecycle.
 
@@ -24,13 +26,15 @@ Sirve la carpeta con un servidor HTTP local (por ejemplo, `python -m http.server
 
 ## Actualización de datos
 
-El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente incluye **ventas y clientes al 22 de octubre de 2026**, y **asistencias y adquisición observada al 19 de octubre de 2026**. Los exports más recientes reemplazan únicamente el tramo de octubre que se superpone con la base histórica, evitando duplicar registros.
+El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el dashboard. El corte publicado actualmente incluye **ventas, clientes, asistencias y adquisición al 26 de octubre de 2026**. La auditoría de conversaciones cubre del **17 de septiembre al 27 de octubre de 2026**. Los exports más recientes reemplazan únicamente el tramo que se superpone con la base histórica, evitando duplicar registros.
 
 ## Estructura
 
 - `index.html`: estructura del dashboard.
 - `styles.css`: diseño responsive.
 - `app.js`: filtros, cálculos, gráficas SVG y exportación CSV.
+- `command-center.css`: comparador, embudo operativo y vista de conversaciones.
+- `command-center.js`: widgets configurables, filtros conversacionales, reglas de fuga y exportación de auditoría.
 - `data.js`: datos agregados del análisis.
 
 ## Embudo y renovación
@@ -38,6 +42,16 @@ El archivo `data.js` contiene el modelo analítico anonimizado utilizado por el 
 El tablero cruza ventas, clases de prueba y asistencias sin exponer datos personales. La conversión de prueba se define como la compra de un paquete dentro de los 30 días posteriores. Las cohortes con menos de 30 días se muestran como inmaduras.
 
 El volumen de adquisición agrupa bookings de Free Pass, 2×1 y 1 clase, con desglose mensual por fecha de venta o emisión. Cada booking muestra primer show, segundo show, conversión observada y conversión madura a 30 días. Los bookings posteriores a una compra core quedan fuera de adquisición de nuevos.
+
+Para el 2×1, el tablero añade las etapas Agenda 1, Show 1, Agenda 2, Show 2 y compra de paquete. Esta lectura usa el reporte de reservas para separar la caída de agendamiento de la inasistencia.
+
+## Conversaciones
+
+Un lead caliente requiere una señal posterior al mensaje precargado: agenda o disponibilidad, precio o pago, intención explícita, aceptación de un CTA o entrega de datos. Los clientes que ya tenían un paquete comercial antes de la señal quedan fuera de esta métrica de adquisición.
+
+La respuesta inicial y el seguimiento manual son métricas distintas. El seguimiento exige un recontacto al menos ocho horas después del último mensaje del cliente y excluye los workflows. “Cliente sin respuesta” identifica conversaciones cuyo último mensaje sustantivo fue inbound y permaneció sin respuesta más de 24 horas. “Web sin seguimiento” identifica envíos de web, horarios, app o link de reserva sin respuesta posterior ni recontacto del equipo en 24 horas.
+
+El estado “leído” proviene del mensaje exportado. Confirma que WhatsApp marcó el mensaje como leído, pero no demuestra que el cliente abrió la página enlazada.
 
 Los nuevos core son clientes que compran por primera vez un paquete distinto de 1 clase y de Friends & Family. Se separan entre atribuidos a una oferta de entrada dentro de 30 días y adquisición directa.
 
